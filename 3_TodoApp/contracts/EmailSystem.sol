@@ -1,8 +1,8 @@
 pragma solidity ^0.5.0;
 
 contract EmailSystem {
-    event OnOpenMail(address receiverAddr);
-    event OnSendMail(bytes32 mid);
+    event OnOpenMail(address receiverAddr, uint256 mid);
+    event OnSendMail(uint256 mid));
 
     struct MailBox {
         uint256[] mails;
@@ -52,18 +52,24 @@ contract EmailSystem {
     }
 
     // Public function
-    function addUser(address _addr, string _name)
+    function addUser(string _name)
         public
-        isUserNotExists(_addr)
+        isUserNotExists(msg.sender)
         returns (bool)
-    {}
+    {
+        generalUsers[msg.sender] = User(_name, msg.sender);
+        return true;
+    }
 
     function addCorporateUser(address _addr)
         public
         isAdmin(msg.sender)
         isUserExists(_addr)
         returns (bool)
-    {}
+    {
+        verifiedUsers[_addr] = generalUsers[_addr];
+        return true;
+    }
 
     function validateCorporateUser(address _addr) public view returns (bool) {
         return verifiedUsers[_addr] != bytes(0x0);
@@ -71,17 +77,40 @@ contract EmailSystem {
 
     function sendMail(Mail _mail) public returns (bool) {}
 
-    function getInboxMails() public returns (Mail[] memory) {}
+    function getInboxMails() public returns (Mail[] memory) {
+        uint256 numMail = generalUsers[msg.sender].inbox.mail.length;
+        Mail[] memory ret = new Mail[](numMail);
+        for (uint256 i = 0; i < numMail; i++) {
+            uint256 mid = generalUsers[msg.sender].inbox.mail[i];
+            ret[i] = mails[mid];
+        }
+        return ret;
+    }
 
-    function getOutboxMails() public returns (Mail[] memory) {}
+    function getOutboxMails() public returns (Mail[] memory) {
+        uint256 numMail = generalUsers[msg.sender].outbox.mail.length;
+        Mail[] memory ret = new Mail[](numMail);
+        for (uint256 i = 0; i < numMail; i++) {
+            uint256 mid = generalUsers[msg.sender].outbox.mail[i];
+            ret[i] = mails[mid];
+        }
+        return ret;
+    }
 
-    function openMail(uint256 memory mid) public {}
+    function openMail(uint256 memory mid) public {
+        mails[mid].countOpen ++;
+        emit OnOpenMail(msg.sender, mid);
+    }
 
     function addAdmin(address _addr)
         public
         isAdmin(msg.sender)
+        isUserExists(_addr)
         returns (bool)
-    {}
+    {
+        verifiedUsers[_addr] = generalUsers[_addr];
+        return true;
+    }
 
     // Private methods
     function _encryptContent(string memory _content)
