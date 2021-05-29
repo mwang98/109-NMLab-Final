@@ -15,7 +15,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import getWeb3 from "./utils/getWeb3";
 
-import TodoAppContract from "./build/contracts/TodoApp.json"
+import TodoAppContract from "./build/contracts/TodoApp.json";
 
 import TodoHeader from './pages/TodoHeader';
 import TodoForm from './pages/TodoForm';
@@ -38,11 +38,14 @@ class TodoApp extends React.Component {
       const web3 = await getWeb3();
       const accounts = await web3.eth.getAccounts();
       const networkId = await web3.eth.net.getId();
+      console.log(networkId);
+      console.log(TodoAppContract.networks);
       const deployedNetwork = TodoAppContract.networks[networkId];
       const instance = new web3.eth.Contract(
         TodoAppContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
+      console.log(deployedNetwork);
       this.setState({ web3, accounts, contract: instance });
     } catch (error) {
       alert(
@@ -64,22 +67,32 @@ class TodoApp extends React.Component {
       done: false
     });
     this.setState({todoItems: todoItems});
+    this.state.contract.methods
+      .addTodo(todoItem.newItemValue)
+      .send({ from: this.state.accounts[0] })
   }
+
   removeItem (itemIndex) {
     todoItems.splice(itemIndex, 1);
     this.setState({todoItems: todoItems});
+    this.state.contract.methods
+      .deleteTodo(itemIndex)
+      .send({ from: this.state.accounts[0] })
   }
+
   markTodoDone(itemIndex) {
     var todo = todoItems[itemIndex];
     todoItems.splice(itemIndex, 1);
+    let func;
     if (todo.done) {
-
+      func = this.state.contract.methods.undoneTodo;
     } else {
-
+      func = this.state.contract.methods.completeTodo;
     }
     todo.done = !todo.done;
     todo.done ? todoItems.push(todo) : todoItems.unshift(todo);
     this.setState({todoItems: todoItems});  
+    func(itemIndex).send({ from: this.state.accounts[0] });
   }
 
   /* END OF YOUR CODE */
