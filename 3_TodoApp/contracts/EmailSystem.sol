@@ -1,8 +1,9 @@
 pragma solidity ^0.5.0;
+pragma experimental ABIEncoderV2;
 
 contract EmailSystem {
     event OnOpenMail(address receiverAddr, uint256 mid);
-    event OnSendMail(uint256 mid));
+    event OnSendMail(uint256 mid);
 
     struct MailBox {
         uint256[] mails;
@@ -25,7 +26,6 @@ contract EmailSystem {
         MailBox inbox;
         MailBox outbox;
     }
-
     address adminAddr;
 
     mapping(address => User) generalUsers;
@@ -43,21 +43,23 @@ contract EmailSystem {
         _;
     }
     modifier isUserExists(address _addr) {
-        require(generalUsers[_addr] != bytes(0x0));
+        require(generalUsers[_addr].addr != address(0));
         _;
     }
     modifier isUserNotExists(address _addr) {
-        require(generalUsers[_addr] == bytes(0x0));
+        require(generalUsers[_addr].addr == address(0));
         _;
     }
 
     // Public function
-    function addUser(string _name)
+    function addUser(string memory _name)
         public
         isUserNotExists(msg.sender)
         returns (bool)
     {
-        generalUsers[msg.sender] = User(_name, msg.sender);
+        MailBox memory inbox;
+        MailBox memory outbox;
+        generalUsers[msg.sender] = User(_name, msg.sender, inbox, outbox);
         return true;
     }
 
@@ -72,32 +74,36 @@ contract EmailSystem {
     }
 
     function validateCorporateUser(address _addr) public view returns (bool) {
-        return verifiedUsers[_addr] != bytes(0x0);
+        return verifiedUsers[_addr].addr != address(0);
     }
 
-    function sendMail(Mail _mail) public returns (bool) {}
-
-    function getInboxMails() public returns (Mail[] memory) {
-        uint256 numMail = generalUsers[msg.sender].inbox.mail.length;
+    function sendMail(Mail memory _mail) public returns (bool) {
+        mails.push(_mail);
+        generalUsers[_mail.senderAddr].outbox.mails.push(_mail.id);
+        generalUsers[_mail.receiverAddr].inbox.mails.push(_mail.id);
+        return true;
+    }
+    function getInboxMails() public view returns (Mail[] memory) {
+        uint256 numMail = generalUsers[msg.sender].inbox.mails.length;
         Mail[] memory ret = new Mail[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[msg.sender].inbox.mail[i];
+            uint256 mid = generalUsers[msg.sender].inbox.mails[i];
             ret[i] = mails[mid];
         }
         return ret;
     }
 
-    function getOutboxMails() public returns (Mail[] memory) {
-        uint256 numMail = generalUsers[msg.sender].outbox.mail.length;
+    function getOutboxMails() public view returns (Mail[] memory) {
+        uint256 numMail = generalUsers[msg.sender].outbox.mails.length;
         Mail[] memory ret = new Mail[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[msg.sender].outbox.mail[i];
+            uint256 mid = generalUsers[msg.sender].outbox.mails[i];
             ret[i] = mails[mid];
         }
         return ret;
     }
 
-    function openMail(uint256 memory mid) public {
+    function openMail(uint256 mid) public {
         mails[mid].countOpen ++;
         emit OnOpenMail(msg.sender, mid);
     }
@@ -115,11 +121,11 @@ contract EmailSystem {
     // Private methods
     function _encryptContent(string memory _content)
         internal
-        returns (string)
+        returns (string memory) 
     {}
 
     function _decryptContent(string memory _encryptedContent)
         internal
-        returns (string)
+        returns (string memory )
     {}
 }
