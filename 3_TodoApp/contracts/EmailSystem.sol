@@ -22,6 +22,7 @@ contract EmailSystem {
 
     struct User {
         string name;
+        string public_key;
         address addr;
         MailBox inbox;
         MailBox outbox;
@@ -52,14 +53,14 @@ contract EmailSystem {
     }
 
     // Public function
-    function addUser(string memory _name)
+    function addUser(string memory _name, string memory _public_key)
         public
         isUserNotExists(msg.sender)
         returns (bool)
     {
         MailBox memory inbox;
         MailBox memory outbox;
-        generalUsers[msg.sender] = User(_name, msg.sender, inbox, outbox);
+        generalUsers[msg.sender] = User(_name, _public_key, msg.sender, inbox, outbox);
         return true;
     }
 
