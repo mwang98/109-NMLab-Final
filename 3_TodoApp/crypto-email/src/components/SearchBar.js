@@ -8,6 +8,7 @@ import InputBase from '@material-ui/core/InputBase';
 import { fade } from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
+import Badge from '@material-ui/core/Badge';
 
 const styles = theme => ({
     root: {
@@ -72,11 +73,14 @@ class SearchBar extends Component{
         return (
         <AppBar position="static">
             <Toolbar>
-                <MailOutlineIcon />
+                <Badge badgeContent={4} max={999} color="secondary">
+                    <MailOutlineIcon />
+                </Badge>
+                
                 <Typography className={classes.title} variant="h5" noWrap> Mail Box </Typography>
                 <div className={classes.search}>
                     <div className={classes.searchIcon}>
-                        <SearchIcon />
+                    <SearchIcon />
                     </div>
                     <InputBase
                         placeholder="Search…"
