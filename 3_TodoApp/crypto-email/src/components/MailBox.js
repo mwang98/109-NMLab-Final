@@ -53,8 +53,9 @@ class MailBox extends Component {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map(mail => 
                         <MailCard mail={mail}
-                                selectedMid={selectedMid}
-                                onSelectMail={onSelectMail}/>)}
+                                  pageType={pageType}
+                                  selectedMid={selectedMid}
+                                  onSelectMail={onSelectMail}/>)}
                 </List>
                 <TablePagination
                     component="div"
@@ -64,7 +65,6 @@ class MailBox extends Component {
                     rowsPerPage={rowsPerPage}
                     onChangeRowsPerPage={this.onChangeRowsPerPage} />
             </div>
-            
         );
     }
 }

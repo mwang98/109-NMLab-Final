@@ -40,6 +40,11 @@ class MailBoxPage extends Component{
 
     onSelectMail = (event, mid) => {
         this.setState({selectedMid: mid})
+        if (this.props.type === PAGE_TYPE.INBOX){
+            let mail = this.state.mailMap.get(mid)
+            mail.isOpen = true
+            this.onSaveMail(event, mail)
+        }
     }
     onSaveMail = (event, mail) => {
         this.setState(state => {

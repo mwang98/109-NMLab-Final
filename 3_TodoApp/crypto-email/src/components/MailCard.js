@@ -6,21 +6,25 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
 
+import { PAGE_TYPE } from '../constants/Page';
+
 const styles = theme => ({
     root: {
       width: '100%',
-      // maxWidth: 360,
       backgroundColor: theme.palette.background.paper,
     },
     inline: {
       display: 'inline'
     },
-    card: {
-        height: '100%'
+    cardUnread: {
+        backgroundColor: '#FAE8E0'
     },
     contents: {
         overflow: 'hidden',
         textOverflow: 'ellipsis'
+    },
+    unread: {
+        alignItemsFlexStart: 'center'
     }
 });
 
@@ -30,28 +34,28 @@ class MailCard extends Component{
     }
 
     render(){
-        const { classes, mail, selectedMid, onSelectMail } = this.props;
+        const { classes, mail, pageType, selectedMid, onSelectMail } = this.props;
         return (
-        <ListItem 
-            alignItems="flex-start"
-            button
-            selected={selectedMid === mail.id}
-            onClick={event => onSelectMail(event, mail.id)}
-            className={classes.card}>
-        <ListItemAvatar>
-            <Avatar alt={mail.senderName} src="/static/images/avatar/1.jpg" />
-        </ListItemAvatar>
-        <ListItemText
-            primary={mail.subject}
-            secondary={
-                <React.Fragment>
-                    <Typography component="span" className={classes.inline} color="textPrimary">
-                        {mail.senderName}
-                    </Typography>
-                </React.Fragment>
-        }
-        />
-    </ListItem>)
+            <ListItem 
+                button
+                alignItems="flex-start"
+                selected={selectedMid === mail.id}
+                onClick={event => onSelectMail(event, mail.id)}
+                className={pageType === PAGE_TYPE.DRAFT || mail.isOpen ? {} : classes.cardUnread}>
+                <ListItemAvatar>
+                    <Avatar alt={mail.senderName} src="/static/images/avatar/1.jpg" />
+                </ListItemAvatar>
+                <ListItemText
+                    primary={mail.subject}
+                    secondary={
+                        <React.Fragment>
+                            <Typography component="span" className={classes.inline} color="textPrimary">
+                                {mail.senderName}
+                            </Typography>
+                        </React.Fragment>
+                }
+                />
+            </ListItem>)
     }
 }
 

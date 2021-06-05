@@ -39,7 +39,63 @@ const mockMailList = [
         "multiMediaContents":[
             "123","456","789"
         ],
-        "isOpen": 0
+        "isOpen": 1
+    },
+    {
+        "id": "5ac272582-c47a-11eb-9fb9-8c8590312a7a",
+        "senderAddr": "mike@gmail.com",
+        "receiverAddr": "robert@gmail.com",
+        "senderName": "mike111",
+        "receiverName": "robert111",
+        "subject": "Mock email 2",
+        "timestamp": "2020/01/01",
+        "contents": "Testing 123",
+        "multiMediaContents":[
+            "123","456","789"
+        ],
+        "isOpen": 1
+    },
+    {
+        "id": "5ac27582-c47a-11eb-96fb9-8c8590312a7a",
+        "senderAddr": "mike@gmail.com",
+        "receiverAddr": "robert@gmail.com",
+        "senderName": "mike111",
+        "receiverName": "robert111",
+        "subject": "Mock email 2",
+        "timestamp": "2020/01/01",
+        "contents": "Testing 123",
+        "multiMediaContents":[
+            "123","456","789"
+        ],
+        "isOpen": 1
+    },
+    {
+        "id": "5ac27582-c47a-11eb3-9fb9-8c8590312a7a",
+        "senderAddr": "mike@gmail.com",
+        "receiverAddr": "robert@gmail.com",
+        "senderName": "mike111",
+        "receiverName": "robert111",
+        "subject": "Mock email 2",
+        "timestamp": "2020/01/01",
+        "contents": "Testing 123",
+        "multiMediaContents":[
+            "123","456","789"
+        ],
+        "isOpen": 1
+    },
+    {
+        "id": "5ac27582-c417a-11eb-9fb9-8c8590312a7a",
+        "senderAddr": "mike@gmail.com",
+        "receiverAddr": "robert@gmail.com",
+        "senderName": "mike111",
+        "receiverName": "robert111",
+        "subject": "Mock email 2",
+        "timestamp": "2020/01/01",
+        "contents": "Testing 123",
+        "multiMediaContents":[
+            "123","456","789"
+        ],
+        "isOpen": 1
     }
 ]
 
