@@ -12,13 +12,14 @@ import './InboxPage.css';
 
 const styles = theme => ({
     root: {
-      flexGrow: 1,
+        justifyContent: 'center',
+        padding: theme.spacing(5)
     },
     paper: {
-      padding: theme.spacing(2),
-      textAlign: 'center',
-      color: theme.palette.text.secondary,
-    },
+        padding: theme.spacing(5),
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    }
 });
 
 class InboxPage extends Component{
@@ -26,8 +27,10 @@ class InboxPage extends Component{
     constructor(props){
         super(props);
         this.state = {
-            selectedMid: ''
+            selectedMid: '',
+            mailMap: new Map()
         }
+        MockMailList.forEach(mail => this.state.mailMap.set(mail.id, mail))
     }
 
     componentDidMount = async () => {
@@ -36,29 +39,46 @@ class InboxPage extends Component{
 
     onSelectMail = (event, mid) => {
         this.setState({selectedMid: mid})
-        console.log(mid)
+    }
+    onSaveMail = (event, mail) => {
+        this.setState(state => {
+            const { id } = mail
+            const newMailMap = new Map(state.mailMap)
+            const newMail = {
+                ...newMailMap.get(id),
+                ...mail
+            }
+            return {mailMap: newMailMap.set(id, newMail)}
+        })
+    }
+    onSendMail = event => {
+        
     }
 
 
     render(){
         const { classes } = this.props;
-        var mailMap = new Map();
-        MockMailList.forEach(mail => mailMap.set(mail.id, mail))
+        const { mailMap, selectedMid } = this.state
 
         return(
              <div className={classes.root}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <Paper className={classes.paper}>xs=12</Paper>
+                <Grid container spacing={5}>
+                    <Grid item xs={6}>
+                        <Paper elevation={3} className={classes.paper}>
+                            <MailPreview mail={mailMap.get(selectedMid)}
+                                         isInbox={false}
+                                         readOnly={false}
+                                         onSaveMail={this.onSaveMail}
+                                         onSendMail={this.onSendMail}/>
+                        </Paper>
                     </Grid>
                     <Grid item xs={6}>
-                        <MailPreview mail={mailMap.get(this.state.selectedMid)} />
-                    </Grid>
-                    <Grid item xs={6}>
-                        <MailBox 
-                            mailList={MockMailList} 
-                            selectedMid={this.state.selectedMid}
-                            onSelectMail={this.onSelectMail} />
+                        <Paper elevation={3}>
+                            <MailBox 
+                                mailList={[...mailMap.values()]} 
+                                selectedMid={selectedMid}
+                                onSelectMail={this.onSelectMail} />
+                        </Paper>
                     </Grid>
                 </Grid>
            </div>
