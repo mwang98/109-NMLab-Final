@@ -59,6 +59,10 @@ class MailBoxPage extends Component {
     };
     onSendMail = (event) => {};
 
+    onUploadFile = (event) => {
+        
+    }
+
     render() {
         const { classes, type } = this.props;
         const { mailMap, selectedMid } = this.state;

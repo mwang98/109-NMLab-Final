@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
@@ -42,28 +43,66 @@ class MailPreview extends Component {
         const { mail } = props;
 
         this.state = {
-            multiMedia: {
-                pdfList: [],
-                fileList: [],
-                videoList: [],
-            },
-            fileList: [],
             mail: mail,
+            fileList: new Map(),
             mailIsSaved: true,
         };
     }
 
     static getDerivedStateFromProps(props, state) {
         if (state.mail.id !== props.mail.id) {
-            return { ...state, mail: props.mail };
+            return { mail: props.mail, fileList: new Map(), mailIsSaved: true };
         }
         return null;
     }
 
+    getFileType = (typeStr) => {
+        let filetype = typeStr.split("/");
+        if (filetype[0] === "text") return "text";
+        else if (filetype[0] === "video") return "video";
+        else if (filetype[0] === "image") return "image";
+        else if (filetype[1] === "pdf") return "pdf";
+        return null;
+    };
+
     onUploadFile = (event) => {
-        this.setState((state) => ({
-            fileList: [...state.fileList, ...event.target.files],
-        }));
+        event.stopPropagation();
+        event.preventDefault();
+
+        const file = event.target.files[0];
+        const id = uuidv4();
+
+        let fileType = this.getFileType(file.type);
+
+        if (fileType === null) {
+            alert(`${file.type} not supported !`);
+            return;
+        }
+
+        this.setState((state) => {
+            const newFileList = new Map(state.fileList);
+            const newFile = {
+                fileName: file.name,
+                fileType: fileType,
+                buffer: null,
+                IPFSHash: null,
+            };
+            return { fileList: newFileList.set(id, newFile), mailIsSaved: false };
+        });
+
+        let reader = new window.FileReader();
+        reader.readAsArrayBuffer(file);
+        reader.onloadend = () => this.toBuffer(id, reader);
+    };
+
+    toBuffer = async (id, reader) => {
+        const buffer = await Buffer.from(reader.result);
+        this.setState((state) => {
+            const newFileList = new Map(state.fileList);
+            const newFile = newFileList.get(id);
+            newFile.buffer = buffer;
+            return { fileList: newFileList.set(id, newFile) };
+        });
     };
 
     onChangeSubject = (event) => {
@@ -95,14 +134,24 @@ class MailPreview extends Component {
     };
     onSaveMail = (event, mail) => {
         this.setState({ mailIsSaved: true });
+        mail.multiMediaContents = [...this.state.fileList.values()];
         this.props.onSaveMail(event, mail);
     };
 
     render() {
         const { classes, pageType, onSendMail } = this.props;
         const { mail, mailIsSaved } = this.state;
-        const { subject, senderAddr, senderName, receiverAddr, receiverName, timestamp, contents, isOpen } =
-            this.state.mail;
+        const {
+            subject,
+            senderAddr,
+            senderName,
+            receiverAddr,
+            receiverName,
+            timestamp,
+            contents,
+            multiMediaContents,
+            isOpen,
+        } = this.state.mail;
 
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
@@ -169,24 +218,14 @@ class MailPreview extends Component {
                 {!readOnly ? (
                     <>
                         <Grid item xs={12}>
-                            {this.state.fileList.map((file) => (
-                                <AttachFile filename={file.name} />
+                            {[...this.state.fileList.values()].map((file) => (
+                                <AttachFile filename={file.fileName} />
                             ))}
                         </Grid>
                         <Grid container xs={5} className={classes.upload}>
                             <Button>
                                 <PictureAsPdfIcon color="primary" />
-                                <input type="file" accept=".pdf" onChange={this.onUploadFile} />
-                            </Button>
-                            <br />
-                            <Button>
-                                <InsertPhotoIcon color="primary" />
-                                <input type="file" accept="image/*" onChange={this.onUploadFile} />
-                            </Button>
-                            <br />
-                            <Button>
-                                <VideoLibraryIcon color="primary" />
-                                <input type="file" accept="video/*" onChange={this.onUploadFile} />
+                                <input type="file" onChange={this.onUploadFile} />
                             </Button>
                         </Grid>
                         <Grid container xs={7} spacing={1} className={classes.submit}>
@@ -208,13 +247,20 @@ class MailPreview extends Component {
                         </Grid>
                     </>
                 ) : (
-                    <Grid container xs={12} className={classes.submit}>
-                        <Grid item xs={3}>
-                            <Button variant="outlined" color="primary" startIcon={<ReplyIcon />}>
-                                reply
-                            </Button>
+                    <>
+                        <Grid item xs={12}>
+                            {[...multiMediaContents.values()].map((file) => (
+                                <AttachFile filename={file.fileName} />
+                            ))}
                         </Grid>
-                    </Grid>
+                        <Grid container xs={12} className={classes.submit}>
+                            <Grid item xs={3}>
+                                <Button variant="outlined" color="primary" startIcon={<ReplyIcon />}>
+                                    reply
+                                </Button>
+                            </Grid>
+                        </Grid>
+                    </>
                 )}
             </Grid>
         );
