@@ -44,9 +44,12 @@ class MailBox extends Component {
     render(){
         const { classes, mailList, pageType, selectedMid, onSelectMail, onDeleteMail } = this.props;
         const { page, rowsPerPage, searchKey } = this.state;
+
+        const numUnread = mailList.filter(mail => !mail.isOpen).length
+        
         return (
             <div>
-                <SearchBar title={pageType} onSearchChange={this.onSearchChange}/>
+                <SearchBar title={pageType} numUnread={numUnread} onSearchChange={this.onSearchChange}/>
                 <List className={classes.root}>
                     {mailList
                     .filter(mail => mail.subject.toLowerCase().includes(searchKey))

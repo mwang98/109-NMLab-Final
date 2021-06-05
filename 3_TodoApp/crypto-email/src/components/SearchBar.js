@@ -69,11 +69,11 @@ class SearchBar extends Component{
     }
 
     render(){
-        const { classes, title, onSearchChange } = this.props;
+        const { classes, title, numUnread, onSearchChange } = this.props;
         return (
         <AppBar position="static">
             <Toolbar>
-                <Badge badgeContent={4} max={999} color="secondary">
+                <Badge badgeContent={numUnread} max={999} color="secondary">
                     <MailOutlineIcon />
                 </Badge>
                 
