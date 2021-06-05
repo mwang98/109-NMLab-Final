@@ -5,11 +5,16 @@ import Avatar from '@material-ui/core/Avatar';
 import TextField from '@material-ui/core/TextField';
 // import AccountCircle from '@material-ui/icons/AccountCircle';
 import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
+
 
 import InsertPhotoIcon from '@material-ui/icons/InsertPhoto';
 import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import VideoLibraryIcon from '@material-ui/icons/VideoLibrary';
+import SaveAltIcon from '@material-ui/icons/SaveAlt';
+import SendIcon from '@material-ui/icons/Send';
+import ReplyIcon from '@material-ui/icons/Reply';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 import AttachFile from './AttachFile';
 
@@ -20,7 +25,6 @@ const styles = theme => ({
     },
     flexStart: {
         alignItems: 'flext-start',
-        justifyContent: 'space-between'
     },
     large: {
         width: theme.spacing(10),
@@ -49,7 +53,8 @@ class MailPreview extends Component{
                 videoList: []
             },
             fileList: [],
-            mail: mail
+            mail: mail,
+            mailIsSaved: true,
         }
     }
 
@@ -70,38 +75,45 @@ class MailPreview extends Component{
         this.setState(state => ({
             mail: {
                 ...state.mail,
-                subject: event.target.value
-            }
+                subject: event.target.value,
+            },
+            mailIsSaved: false
         }))
     }
     onChangeContents = event => {
         this.setState(state => ({
             mail: {
                 ...state.mail,
-                contents: event.target.value
-            }
+                contents: event.target.value,
+            },
+            mailIsSaved: false
         }))
     }
     onChangeReceiverAddr = event => {
         this.setState(state => ({
             mail: {
                 ...state.mail,
-                receiverAddr: event.target.value
-            }
+                receiverAddr: event.target.value,
+            },
+            mailIsSaved: false
         }))
+    }
+    onSaveMail = (event, mail) => {
+        this.setState({mailIsSaved: true})
+        this.props.onSaveMail(event, mail)
     }
 
 
     render(){
         const { classes, isInbox, onSaveMail, onSendMail } = this.props
-        const { readOnly, mail } = this.state
-        const { subject, senderAddr, senderName, receiverAddr, receiverName, timestamp, contents } = this.state.mail
+        const { readOnly, mail, mailIsSaved } = this.state
+        const { subject, senderAddr, senderName, receiverAddr, receiverName, timestamp, contents, isOpen } = this.state.mail
 
         return (
             <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12}>
                     <TextField
-                        label="Subject"
+                        label='Subject'
                         value={subject}
                         InputProps={{ readOnly: readOnly }}
                         fullWidth 
@@ -111,12 +123,12 @@ class MailPreview extends Component{
                 <Grid item xs={2}>
                     <Avatar alt={isInbox ? senderName: receiverName}
                             className={classes.large} 
-                            src="../logo.png" />
+                            src='../logo.png' />
                 </Grid>
-                <Grid item xs={10} container className={classes.flexStart}>
+                <Grid item xs={10} container spacing={1} className={classes.flexStart}>
                     <Grid item xs={9}>
                         <TextField
-                            label={isInbox ? "Sender": "Receiver"}
+                            label={isInbox ? 'Sender': 'Receiver'}
                             value={isInbox ? senderName: receiverName}
                             InputProps={{ readOnly: true }}
                             fullWidth />
@@ -124,7 +136,7 @@ class MailPreview extends Component{
                     </Grid>
                     <Grid item xs={2}>
                         <TextField
-                            label="Timestamp"
+                            label='Timestamp'
                             value={timestamp}
                             InputProps={{ readOnly: true }}
                             fullWidth />
@@ -132,44 +144,52 @@ class MailPreview extends Component{
                     </Grid>
                     <Grid item xs={9}>
                         <TextField
-                            label="Address"
+                            label='Address'
                             value={isInbox ? senderAddr: receiverAddr}
                             InputProps={{ readOnly: readOnly }}
                             fullWidth 
                             onChange={this.onChangeReceiverAddr}/> 
                     </Grid>
-                    <Grid item xs={2}><Button>Read</Button></Grid>
+                    <Grid item xs={2}>
+                        <Button color='primary'
+                                variant={isOpen ? 'contained' : 'outlined'}
+                                startIcon={isOpen ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                >
+                            {isOpen ? 'read' : 'unread'}
+                        </Button>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12}>
                     <TextField
-                        label="Contents"
+                        label='Contents'
                         value={contents}
                         InputProps={{ readOnly: readOnly }}
                         fullWidth 
                         multiline
                         rowsMax={20}
                         rows={20}
-                        variant="outlined"
-                        className={classes.contents}/>
+                        variant='outlined'
+                        className={classes.contents}
+                        onChange={this.onChangeContents}/>
                 </Grid>
                 {!readOnly ? 
                 <>
                 <Grid item xs={12}>
                     {this.state.fileList.map(file => <AttachFile filename={file.name}/>)}
                 </Grid>
-                <Grid container xs={6} className={classes.upload}>
+                <Grid container xs={5} className={classes.upload}>
                     <Button><PictureAsPdfIcon color='primary'/><input type='file' accept='.pdf' onChange={this.onUploadFile}/></Button><br/>
                     <Button><InsertPhotoIcon color='primary'/><input type='file' accept='image/*' onChange={this.onUploadFile}/></Button><br/>
                     <Button><VideoLibraryIcon color='primary'/><input type='file' accept='video/*'onChange={this.onUploadFile}/></Button>
                 </Grid>
-                <Grid container xs={6} className={classes.submit}>
-                    <Grid item xs={3}> <Button variant="outlined" color="primary" onClick={e => onSaveMail(e, mail)}> save </Button> </Grid>
-                    <Grid item xs={3}> <Button variant="outlined" color="primary"> send </Button> </Grid>
+                <Grid container xs={7} spacing={1} className={classes.submit}>
+                    <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}> save </Button> </Grid>
+                    <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}> send </Button> </Grid>
                 </Grid>
                 </> : <></>
                 }
                 <Grid container xs={12} className={classes.submit}>
-                    <Grid item xs={3}> <Button variant="outlined" color="primary"> reply </Button> </Grid>
+                    <Grid item xs={3}> <Button variant='outlined' color='primary' startIcon={<ReplyIcon />}> reply </Button> </Grid>
                 </Grid>
                 
             </Grid>
