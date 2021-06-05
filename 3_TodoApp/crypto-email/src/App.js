@@ -5,7 +5,8 @@ import Button from '@material-ui/core/Button';
 
 import logo from './logo.svg';
 import './App.css';
-import InboxPage from './containers/InboxPage';
+import { PAGE_TYPE } from './constants/Page';
+import MailBoxPage from './containers/MailBoxPage';
 import NavigationBar from './containers/NavigationBar';
 
 const useStyles = makeStyles({
@@ -30,7 +31,9 @@ function App() {
 
 
             <Switch>
-                <Route path='/inbox' component={InboxPage}/>
+                <Route path='/inbox' component={() => <MailBoxPage type={PAGE_TYPE.INBOX}/>}/>
+                <Route path='/outbox' component={() => <MailBoxPage type={PAGE_TYPE.OUTBOX}/>}/>
+                <Route path='/draft' component={() => <MailBoxPage type={PAGE_TYPE.DRAFT}/>}/>
             </Switch>
         </div>
     );
