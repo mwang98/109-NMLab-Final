@@ -7,6 +7,7 @@ const styles = (theme) => ({
     root: {
         display: "flex",
         flexDirection: "row",
+        margin: theme.spacing(1),
     },
 });
 
