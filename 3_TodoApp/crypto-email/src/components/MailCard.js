@@ -1,50 +1,37 @@
-import React, { Component } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import Avatar from '@material-ui/core/Avatar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemAvatar from "@material-ui/core/ListItemAvatar";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import Avatar from "@material-ui/core/Avatar";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteIcon from "@material-ui/icons/Delete";
 
-import { PAGE_TYPE } from '../constants/Page';
+import { PAGE_TYPE } from "../constants/Page";
 
-const styles = theme => ({
-    root: {
-      width: '100%',
-      backgroundColor: theme.palette.background.paper,
-    },
-    inline: {
-      display: 'inline'
-    },
+const styles = (theme) => ({
     cardUnread: {
-        backgroundColor: '#FAE8E0'
+        backgroundColor: "#FAE8E0",
     },
-    contents: {
-        overflow: 'hidden',
-        textOverflow: 'ellipsis'
-    },
-    unread: {
-        alignItemsFlexStart: 'center'
-    }
 });
 
-class MailCard extends Component{
-    constructor(props){
+class MailCard extends Component {
+    constructor(props) {
         super(props);
     }
 
-    render(){
+    render() {
         const { classes, mail, pageType, selectedMid, onSelectMail, onDeleteMail } = this.props;
         return (
-            <ListItem 
+            <ListItem
                 button
                 alignItems="flex-start"
                 selected={selectedMid === mail.id}
-                onClick={event => onSelectMail(event, mail.id)}
-                className={pageType === PAGE_TYPE.DRAFT || mail.isOpen ? {} : classes.cardUnread}>
+                onClick={(event) => onSelectMail(event, mail.id)}
+                className={pageType === PAGE_TYPE.DRAFT || mail.isOpen ? {} : classes.cardUnread}
+            >
                 <ListItemAvatar>
                     <Avatar alt={mail.senderName} src="/static/images/avatar/1.jpg" />
                 </ListItemAvatar>
@@ -52,15 +39,19 @@ class MailCard extends Component{
                     primary={mail.subject}
                     secondary={
                         <React.Fragment>
-                            <Typography component="span" className={classes.inline} color="textPrimary">
+                            <Typography component="span" color="textPrimary">
                                 {mail.senderName}
                             </Typography>
-                        </React.Fragment>}
+                        </React.Fragment>
+                    }
                 />
                 <ListItemSecondaryAction>
-                    <IconButton onClick={onDeleteMail}><DeleteIcon/></IconButton>
+                    <IconButton onClick={onDeleteMail}>
+                        <DeleteIcon />
+                    </IconButton>
                 </ListItemSecondaryAction>
-            </ListItem>)
+            </ListItem>
+        );
     }
 }
 
