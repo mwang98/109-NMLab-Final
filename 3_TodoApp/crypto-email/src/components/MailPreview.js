@@ -17,6 +17,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 
 import AttachFile from './AttachFile';
+import { PAGE_TYPE } from '../constants/Page';
 
 const styles = theme => ({
     root: {
@@ -43,10 +44,9 @@ class MailPreview extends Component{
     constructor(props){
         super(props);
         
-        const { readOnly, mail } = props
+        const { mail } = props
 
         this.state = {
-            readOnly: readOnly,
             multiMedia: {
                 pdfList: [],
                 fileList: [],
@@ -105,9 +105,14 @@ class MailPreview extends Component{
 
 
     render(){
-        const { classes, isInbox, onSendMail } = this.props
-        const { readOnly, mail, mailIsSaved } = this.state
+        const { classes, pageType, onSendMail } = this.props
+        const { mail, mailIsSaved } = this.state
         const { subject, senderAddr, senderName, receiverAddr, receiverName, timestamp, contents, isOpen } = this.state.mail
+
+        const readOnly = pageType !== PAGE_TYPE.DRAFT
+        const isInbox = pageType === PAGE_TYPE.INBOX
+
+        console.log(pageType, readOnly, isInbox)
 
         return (
             <Grid container spacing={3} className={classes.root}>

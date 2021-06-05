@@ -42,11 +42,11 @@ class MailBox extends Component {
     }
 
     render(){
-        const { classes, mailList, selectedMid, onSelectMail } = this.props;
+        const { classes, mailList, pageType, selectedMid, onSelectMail } = this.props;
         const { page, rowsPerPage, searchKey } = this.state;
         return (
             <div>
-                <SearchBar onSearchChange={this.onSearchChange} />
+                <SearchBar title={pageType} onSearchChange={this.onSearchChange}/>
                 <List className={classes.root}>
                     {mailList
                     .filter(mail => mail.subject.toLowerCase().includes(searchKey))

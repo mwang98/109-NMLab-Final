@@ -69,7 +69,7 @@ class SearchBar extends Component{
     }
 
     render(){
-        const { classes, onSearchChange } = this.props;
+        const { classes, title, onSearchChange } = this.props;
         return (
         <AppBar position="static">
             <Toolbar>
@@ -77,7 +77,7 @@ class SearchBar extends Component{
                     <MailOutlineIcon />
                 </Badge>
                 
-                <Typography className={classes.title} variant="h5" noWrap> Mail Box </Typography>
+                <Typography className={classes.title} variant="h5" noWrap> {title} Mail Box </Typography>
                 <div className={classes.search}>
                     <div className={classes.searchIcon}>
                     <SearchIcon />

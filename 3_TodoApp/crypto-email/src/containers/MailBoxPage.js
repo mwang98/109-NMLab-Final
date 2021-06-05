@@ -69,8 +69,7 @@ class MailBoxPage extends Component{
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
                             <MailPreview mail={mailMap.get(selectedMid)}
-                                         isInbox={type === PAGE_TYPE.INBOX}
-                                         readOnly={type !== PAGE_TYPE.DRAFT}
+                                         pageType={type}
                                          onSaveMail={this.onSaveMail}
                                          onSendMail={this.onSendMail}/>
                         </Paper>
@@ -78,9 +77,10 @@ class MailBoxPage extends Component{
                     <Grid item xs={6}>
                         <Paper elevation={3}>
                             <MailBox 
-                                mailList={[...mailMap.values()]} 
+                                mailList={[...mailMap.values()]}
+                                pageType={type}
                                 selectedMid={selectedMid}
-                                onSelectMail={this.onSelectMail} />
+                                onSelectMail={this.onSelectMail}/>
                         </Paper>
                     </Grid>
                 </Grid>
