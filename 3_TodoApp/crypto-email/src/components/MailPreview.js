@@ -65,6 +65,16 @@ class MailPreview extends Component {
         return null;
     };
 
+    toBuffer = async (id, reader) => {
+        const buffer = await Buffer.from(reader.result);
+        this.setState((state) => {
+            const newFileList = new Map(state.fileList);
+            const newFile = newFileList.get(id);
+            newFile.buffer = buffer;
+            return { fileList: newFileList.set(id, newFile) };
+        });
+    };
+
     onUploadFile = (event) => {
         event.stopPropagation();
         event.preventDefault();
@@ -95,16 +105,6 @@ class MailPreview extends Component {
         reader.onloadend = () => this.toBuffer(id, reader);
     };
 
-    toBuffer = async (id, reader) => {
-        const buffer = await Buffer.from(reader.result);
-        this.setState((state) => {
-            const newFileList = new Map(state.fileList);
-            const newFile = newFileList.get(id);
-            newFile.buffer = buffer;
-            return { fileList: newFileList.set(id, newFile) };
-        });
-    };
-
     onChangeSubject = (event) => {
         this.setState((state) => ({
             mail: {
@@ -114,6 +114,7 @@ class MailPreview extends Component {
             mailIsSaved: false,
         }));
     };
+
     onChangeContents = (event) => {
         this.setState((state) => ({
             mail: {
@@ -123,6 +124,7 @@ class MailPreview extends Component {
             mailIsSaved: false,
         }));
     };
+
     onChangeReceiverAddr = (event) => {
         this.setState((state) => ({
             mail: {
@@ -132,6 +134,7 @@ class MailPreview extends Component {
             mailIsSaved: false,
         }));
     };
+
     onSaveMail = (event, mail) => {
         this.setState({ mailIsSaved: true });
         mail.multiMediaContents = [...this.state.fileList.values()];
