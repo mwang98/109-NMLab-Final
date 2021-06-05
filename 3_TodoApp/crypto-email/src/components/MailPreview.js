@@ -105,7 +105,7 @@ class MailPreview extends Component{
 
 
     render(){
-        const { classes, isInbox, onSaveMail, onSendMail } = this.props
+        const { classes, isInbox, onSendMail } = this.props
         const { readOnly, mail, mailIsSaved } = this.state
         const { subject, senderAddr, senderName, receiverAddr, receiverName, timestamp, contents, isOpen } = this.state.mail
 
@@ -173,23 +173,24 @@ class MailPreview extends Component{
                         onChange={this.onChangeContents}/>
                 </Grid>
                 {!readOnly ? 
-                <>
-                <Grid item xs={12}>
-                    {this.state.fileList.map(file => <AttachFile filename={file.name}/>)}
-                </Grid>
-                <Grid container xs={5} className={classes.upload}>
-                    <Button><PictureAsPdfIcon color='primary'/><input type='file' accept='.pdf' onChange={this.onUploadFile}/></Button><br/>
-                    <Button><InsertPhotoIcon color='primary'/><input type='file' accept='image/*' onChange={this.onUploadFile}/></Button><br/>
-                    <Button><VideoLibraryIcon color='primary'/><input type='file' accept='video/*'onChange={this.onUploadFile}/></Button>
-                </Grid>
-                <Grid container xs={7} spacing={1} className={classes.submit}>
-                    <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}>save</Button> </Grid>
-                    <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}>send</Button> </Grid>
-                </Grid>
-                </> :
-                <Grid container xs={12} className={classes.submit}>
-                    <Grid item xs={3}> <Button variant='outlined' color='primary' startIcon={<ReplyIcon />}>reply</Button></Grid>
-                </Grid>}
+                    <>
+                    <Grid item xs={12}>
+                        {this.state.fileList.map(file => <AttachFile filename={file.name}/>)}
+                    </Grid>
+                    <Grid container xs={5} className={classes.upload}>
+                        <Button><PictureAsPdfIcon color='primary'/><input type='file' accept='.pdf' onChange={this.onUploadFile}/></Button><br/>
+                        <Button><InsertPhotoIcon color='primary'/><input type='file' accept='image/*' onChange={this.onUploadFile}/></Button><br/>
+                        <Button><VideoLibraryIcon color='primary'/><input type='file' accept='video/*'onChange={this.onUploadFile}/></Button>
+                    </Grid>
+                    <Grid container xs={7} spacing={1} className={classes.submit}>
+                        <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}>save</Button> </Grid>
+                        <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}>send</Button> </Grid>
+                    </Grid>
+                    </> :
+                    <Grid container xs={12} className={classes.submit}>
+                        <Grid item xs={3}> <Button variant='outlined' color='primary' startIcon={<ReplyIcon />}>reply</Button></Grid>
+                    </Grid>
+                }
             </Grid>
         )
     }
