@@ -46,6 +46,9 @@ class MailBoxPage extends Component{
             this.onSaveMail(event, mail)
         }
     }
+    onDeleteMail = (event) => {
+        console.log('delete')
+    }
     onSaveMail = (event, mail) => {
         this.setState(state => {
             const { id } = mail
@@ -85,7 +88,8 @@ class MailBoxPage extends Component{
                                 mailList={[...mailMap.values()]}
                                 pageType={type}
                                 selectedMid={selectedMid}
-                                onSelectMail={this.onSelectMail}/>
+                                onSelectMail={this.onSelectMail}
+                                onDeleteMail={this.onDeleteMail}/>
                         </Paper>
                     </Grid>
                 </Grid>

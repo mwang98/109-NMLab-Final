@@ -3,8 +3,11 @@ import { withStyles } from '@material-ui/core/styles';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { PAGE_TYPE } from '../constants/Page';
 
@@ -34,7 +37,7 @@ class MailCard extends Component{
     }
 
     render(){
-        const { classes, mail, pageType, selectedMid, onSelectMail } = this.props;
+        const { classes, mail, pageType, selectedMid, onSelectMail, onDeleteMail } = this.props;
         return (
             <ListItem 
                 button
@@ -52,9 +55,11 @@ class MailCard extends Component{
                             <Typography component="span" className={classes.inline} color="textPrimary">
                                 {mail.senderName}
                             </Typography>
-                        </React.Fragment>
-                }
+                        </React.Fragment>}
                 />
+                <ListItemSecondaryAction>
+                    <IconButton onClick={onDeleteMail}><DeleteIcon/></IconButton>
+                </ListItemSecondaryAction>
             </ListItem>)
     }
 }

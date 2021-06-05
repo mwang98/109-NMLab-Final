@@ -42,7 +42,7 @@ class MailBox extends Component {
     }
 
     render(){
-        const { classes, mailList, pageType, selectedMid, onSelectMail } = this.props;
+        const { classes, mailList, pageType, selectedMid, onSelectMail, onDeleteMail } = this.props;
         const { page, rowsPerPage, searchKey } = this.state;
         return (
             <div>
@@ -55,7 +55,8 @@ class MailBox extends Component {
                         <MailCard mail={mail}
                                   pageType={pageType}
                                   selectedMid={selectedMid}
-                                  onSelectMail={onSelectMail}/>)}
+                                  onSelectMail={onSelectMail}
+                                  onDeleteMail={onDeleteMail}/>)}
                 </List>
                 <TablePagination
                     component="div"
