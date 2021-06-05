@@ -112,8 +112,6 @@ class MailPreview extends Component{
         const readOnly = pageType !== PAGE_TYPE.DRAFT
         const isInbox = pageType === PAGE_TYPE.INBOX
 
-        console.log(pageType, readOnly, isInbox)
-
         return (
             <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12}>
