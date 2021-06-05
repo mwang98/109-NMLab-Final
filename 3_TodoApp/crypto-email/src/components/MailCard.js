@@ -17,6 +17,10 @@ const styles = theme => ({
     },
     card: {
         height: '100%'
+    },
+    contents: {
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
     }
 });
 
@@ -35,18 +39,14 @@ class MailCard extends Component{
             onClick={event => onSelectMail(event, mail.id)}
             className={classes.card}>
         <ListItemAvatar>
-            <Avatar alt={mail.sender} src="/static/images/avatar/1.jpg" />
+            <Avatar alt={mail.senderName} src="/static/images/avatar/1.jpg" />
         </ListItemAvatar>
         <ListItemText
             primary={mail.subject}
             secondary={
                 <React.Fragment>
                     <Typography component="span" className={classes.inline} color="textPrimary">
-                        {mail.sender}
-                    </Typography>
-                    <br />
-                    <Typography component="span" className={classes.inline} color="textSecondary">
-                       {'Content: ' + mail.contents}
+                        {mail.senderName}
                     </Typography>
                 </React.Fragment>
         }
