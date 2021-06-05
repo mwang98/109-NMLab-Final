@@ -183,15 +183,13 @@ class MailPreview extends Component{
                     <Button><VideoLibraryIcon color='primary'/><input type='file' accept='video/*'onChange={this.onUploadFile}/></Button>
                 </Grid>
                 <Grid container xs={7} spacing={1} className={classes.submit}>
-                    <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}> save </Button> </Grid>
-                    <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}> send </Button> </Grid>
+                    <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}>save</Button> </Grid>
+                    <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}>send</Button> </Grid>
                 </Grid>
-                </> : <></>
-                }
+                </> :
                 <Grid container xs={12} className={classes.submit}>
-                    <Grid item xs={3}> <Button variant='outlined' color='primary' startIcon={<ReplyIcon />}> reply </Button> </Grid>
-                </Grid>
-                
+                    <Grid item xs={3}> <Button variant='outlined' color='primary' startIcon={<ReplyIcon />}>reply</Button></Grid>
+                </Grid>}
             </Grid>
         )
     }
