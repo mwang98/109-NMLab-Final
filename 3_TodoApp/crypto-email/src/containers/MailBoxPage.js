@@ -7,6 +7,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailPreview";
 import { PAGE_TYPE } from "../constants/Page";
+import { DummyMail } from "../constants/Mail";
 
 // mock data
 import MockMailList from "../mock/mail.js";
@@ -35,10 +36,32 @@ class MailBoxPage extends Component {
             selectedMid: "",
             mailMap: new Map(),
         };
-        MockMailList.forEach((mail) => this.state.mailMap.set(mail.id, mail));
     }
 
-    componentDidMount = async () => {};
+    componentDidMount = async () => {
+        console.log("componentDidMount");
+        this.updateMyMailBox();
+    };
+
+    updateMyMailBox = async () => {
+        this.setState({
+            mailMap: new Map(MockMailList.map((mail) => [mail.id, mail])),
+        });
+
+        const state = "Code form solidty";
+        // retrieve data from eth networks
+        // switch (this.props.type) {
+        //     case PAGE_TYPE.INBOX:
+        //         "Inbox";
+        //         break;
+        //     case PAGE_TYPE.OUTBOX:
+        //         "Outbox";
+        //         break;
+        //     case PAGE_TYPE.DRAFT:
+        //         "Draft";
+        //         break;
+        // }
+    };
 
     uploadFile = async (buffer) => {
         var result = await ipfs.add(buffer);
@@ -47,14 +70,35 @@ class MailBoxPage extends Component {
 
     onSelectMail = (event, mid) => {
         this.setState({ selectedMid: mid });
+
         if (this.props.type === PAGE_TYPE.INBOX) {
             let mail = this.state.mailMap.get(mid);
             mail.isOpen = true;
-            this.onSaveMail(event, mail);
+
+            const state = "Code form solidty";
+            // open mail
         }
     };
-    onDeleteMail = (event) => {
-        console.log("delete");
+    onDeleteMail = (event, mid) => {
+        const state = "Code form solidty";
+        // delete from database
+        // switch (this.props.type) {
+        //     case PAGE_TYPE.INBOX:
+        //         "Inbox";
+        //         break;
+        //     case PAGE_TYPE.OUTBOX:
+        //         "Outbox";
+        //         break;
+        //     case PAGE_TYPE.DRAFT:
+        //         "Draft";
+        //         break;
+        // }
+
+        // client
+        this.setState((state) => {
+            state.mailMap.delete(mid);
+            return state;
+        });
     };
     onSaveMail = async (event, mail) => {
         event.preventDefault();
@@ -73,7 +117,8 @@ class MailBoxPage extends Component {
                     // const IPFSHash = await this.uploadFile(content.buffer);
                     const IPFSHash = "ipfs-hash-not-available";
 
-                    // // upload to blockchain
+                    const state = "Code form solidty";
+                    // upload to blockchain
                     // const { accounts, contract } = this.props;
                     // console.log(accounts);
                     // let status = await contract.methods
@@ -91,12 +136,11 @@ class MailBoxPage extends Component {
 
             // client
             this.setState((state) => {
-                const newMailMap = new Map(state.mailMap);
                 const newMail = {
-                    ...newMailMap.get(id),
                     ...mail,
+                    multiMediaContents: multiMediaContents,
                 };
-                return { mailMap: newMailMap.set(id, newMail) };
+                return { mailMap: state.mailMap.set(id, newMail) };
             });
 
             console.log("FINISH!");
@@ -111,6 +155,7 @@ class MailBoxPage extends Component {
     render() {
         const { classes, type } = this.props;
         const { mailMap, selectedMid } = this.state;
+        const mail = mailMap.has(selectedMid) ? mailMap.get(selectedMid) : DummyMail;
 
         return (
             <div className={classes.root}>
@@ -118,7 +163,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
                             <MailPreview
-                                mail={mailMap.get(selectedMid)}
+                                mail={mail}
                                 pageType={type}
                                 onSaveMail={this.onSaveMail}
                                 onSendMail={this.onSendMail}
