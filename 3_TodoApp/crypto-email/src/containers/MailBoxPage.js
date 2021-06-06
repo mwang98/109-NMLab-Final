@@ -11,6 +11,11 @@ import { PAGE_TYPE } from "../constants/Page";
 // mock data
 import MockMailList from "../mock/mail.js";
 
+import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
+
+const { create } = require("ipfs-http-client");
+const ipfs = create({ host: ADDRESS, port: PORT, protocol: PROTOCOL });
+
 const styles = (theme) => ({
     root: {
         justifyContent: "center",
@@ -35,6 +40,11 @@ class MailBoxPage extends Component {
 
     componentDidMount = async () => {};
 
+    uploadFile = async (buffer) => {
+        var result = await ipfs.add(buffer);
+        return result.value.path;
+    };
+
     onSelectMail = (event, mid) => {
         this.setState({ selectedMid: mid });
         if (this.props.type === PAGE_TYPE.INBOX) {
@@ -46,22 +56,57 @@ class MailBoxPage extends Component {
     onDeleteMail = (event) => {
         console.log("delete");
     };
-    onSaveMail = (event, mail) => {
-        this.setState((state) => {
-            const { id } = mail;
-            const newMailMap = new Map(state.mailMap);
-            const newMail = {
-                ...newMailMap.get(id),
-                ...mail,
-            };
-            return { mailMap: newMailMap.set(id, newMail) };
-        });
+    onSaveMail = async (event, mail) => {
+        event.preventDefault();
+
+        // ipfs
+        console.log(ipfs.getEndpointConfig());
+        console.log(ipfs);
+
+        try {
+            const { id, multiMediaContents } = mail;
+
+            console.log(multiMediaContents);
+
+            await Promise.all(
+                multiMediaContents.map(async (content) => {
+                    // const IPFSHash = await this.uploadFile(content.buffer);
+                    const IPFSHash = "ipfs-hash-not-available";
+
+                    // // upload to blockchain
+                    // const { accounts, contract } = this.props;
+                    // console.log(accounts);
+                    // let status = await contract.methods
+                    //     .Upload([this.state.fileName, this.state.fileType, mainIPFSHash, previewIPFSHash, accounts[0]])
+                    //     .send({ from: accounts[0] });
+                    // console.log("upload status", status);
+
+                    content.IPFSHash = IPFSHash;
+
+                    return content;
+                })
+            );
+
+            console.log(multiMediaContents);
+
+            // client
+            this.setState((state) => {
+                const newMailMap = new Map(state.mailMap);
+                const newMail = {
+                    ...newMailMap.get(id),
+                    ...mail,
+                };
+                return { mailMap: newMailMap.set(id, newMail) };
+            });
+
+            console.log("FINISH!");
+        } catch (err) {
+            console.log(err);
+        }
     };
     onSendMail = (event) => {};
 
-    onUploadFile = (event) => {
-        
-    }
+    onUploadFile = (event) => {};
 
     render() {
         const { classes, type } = this.props;
