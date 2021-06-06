@@ -5,8 +5,9 @@ import Button from "@material-ui/core/Button";
 
 import "./App.css";
 import { PAGE_TYPE } from "./constants/Page";
-import MailBoxPage from "./containers/MailBoxPage";
 import NavigationBar from "./containers/NavigationBar";
+import MailBoxPage from "./containers/MailBoxPage";
+import CertifiedUserPage from "./containers/CertifiedUserPage";
 
 const useStyles = makeStyles({
     link: {
@@ -38,12 +39,18 @@ function App() {
                         Draft
                     </NavLink>
                 </Button>
+                <Button variant="outlined" className={classes.routeBtn}>
+                    <NavLink to="/certified-users" className={classes.link}>
+                        Certified User
+                    </NavLink>
+                </Button>
             </NavigationBar>
 
             <Switch>
                 <Route path="/inbox" component={() => <MailBoxPage type={PAGE_TYPE.INBOX} />} />
                 <Route path="/outbox" component={() => <MailBoxPage type={PAGE_TYPE.OUTBOX} />} />
                 <Route path="/draft" component={() => <MailBoxPage type={PAGE_TYPE.DRAFT} />} />
+                <Route paht="/certified-users" component={() => <CertifiedUserPage />} />
             </Switch>
         </div>
     );

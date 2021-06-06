@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import List from "@material-ui/core/List";
+import Divider from "@material-ui/core/Divider";
 import TablePagination from "@material-ui/core/TablePagination";
 
 import MailCard from "./MailCard";
@@ -49,19 +50,26 @@ class MailBox extends Component {
 
         return (
             <div>
-                <SearchBar title={pageType} numUnread={numUnread} onSearchChange={this.onSearchChange} />
+                <SearchBar
+                    title={`${pageType} Mail Box`}
+                    badgeContent={numUnread}
+                    onSearchChange={this.onSearchChange}
+                />
                 <List className={classes.root}>
                     {mailList
                         .filter((mail) => mail.subject.toLowerCase().includes(searchKey))
                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                         .map((mail) => (
-                            <MailCard
-                                mail={mail}
-                                pageType={pageType}
-                                selectedMid={selectedMid}
-                                onSelectMail={onSelectMail}
-                                onDeleteMail={onDeleteMail}
-                            />
+                            <>
+                                <MailCard
+                                    mail={mail}
+                                    pageType={pageType}
+                                    selectedMid={selectedMid}
+                                    onSelectMail={onSelectMail}
+                                    onDeleteMail={onDeleteMail}
+                                />
+                                <Divider variant="inset" component="li" />
+                            </>
                         ))}
                 </List>
                 <TablePagination

@@ -1,6 +1,6 @@
 const mockMailList = [
     {
-        id: "",
+        id: "59ae79568a816",
         senderAddr: "foo@microsoft.com",
         receiverAddr: "foo@microsoft.com",
         senderName: "foo",
