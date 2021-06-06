@@ -5,6 +5,8 @@ import Grid from "@material-ui/core/Grid";
 
 import UserBox from "../components/UserBox";
 
+import certifiedUserList from "../mock/user";
+
 const styles = (theme) => ({
     root: {
         justifyContent: "center",
@@ -25,15 +27,29 @@ class CertifiedUserPage extends Component {
         };
     }
 
+    componentDidMount = async () => {
+        this.retrieveCertifiedUsers();
+    };
+
+    retrieveCertifiedUsers = async () => {
+        this.setState({
+            certifiedUserList: certifiedUserList,
+        });
+
+        const state = "Code form solidty";
+        // retrieve users from eth networks
+    };
+
     render() {
         const { classes } = this.props;
+        const { certifiedUserList } = this.state;
 
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}></Grid>
                     <Grid item xs={6}>
-                        <UserBox />
+                        <UserBox userList={certifiedUserList} />
                     </Grid>
                 </Grid>
             </div>

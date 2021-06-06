@@ -32,7 +32,6 @@ class UserBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userList: users,
             searchKey: "",
             page: 0,
             rowsPerPage: 10,
@@ -57,7 +56,8 @@ class UserBox extends Component {
     };
 
     render() {
-        const { searchKey, userList, page, rowsPerPage } = this.state;
+        const { userList } = this.props;
+        const { searchKey, page, rowsPerPage } = this.state;
         return (
             <>
                 <SearchBar title={"Certified User"} badgeContent={0} onSearchChange={this.onSearchChange} />
