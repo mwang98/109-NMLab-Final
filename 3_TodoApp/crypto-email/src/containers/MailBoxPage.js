@@ -50,17 +50,6 @@ class MailBoxPage extends Component {
 
         const state = "Code form solidty";
         // retrieve data from eth networks
-        // switch (this.props.type) {
-        //     case PAGE_TYPE.INBOX:
-        //         "Inbox";
-        //         break;
-        //     case PAGE_TYPE.OUTBOX:
-        //         "Outbox";
-        //         break;
-        //     case PAGE_TYPE.DRAFT:
-        //         "Draft";
-        //         break;
-        // }
     };
 
     uploadFile = async (buffer) => {
@@ -82,17 +71,6 @@ class MailBoxPage extends Component {
     onDeleteMail = (event, mid) => {
         const state = "Code form solidty";
         // delete from database
-        // switch (this.props.type) {
-        //     case PAGE_TYPE.INBOX:
-        //         "Inbox";
-        //         break;
-        //     case PAGE_TYPE.OUTBOX:
-        //         "Outbox";
-        //         break;
-        //     case PAGE_TYPE.DRAFT:
-        //         "Draft";
-        //         break;
-        // }
 
         // client
         this.setState((state) => {
