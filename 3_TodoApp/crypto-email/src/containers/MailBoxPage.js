@@ -31,7 +31,8 @@ class MailBoxPage extends Component{
             selectedMid: '',
             mailMap: new Map()
         }
-        MockMailList.forEach(mail => this.state.mailMap.set(mail.id, mail))
+        MockMailList.forEach(mail => this.state.mailMap.set(mail.id, mail));
+        this.onSendMail = this.onSendMail.bind(this);
     }
 
     componentDidMount = async () => {
@@ -52,8 +53,8 @@ class MailBoxPage extends Component{
             return {mailMap: newMailMap.set(id, newMail)}
         })
     }
-    onSendMail = event => {
-        
+    onSendMail = (event, mail) => {
+        this.props.sendMail(mail);
     }
 
 

@@ -187,7 +187,7 @@ class MailPreview extends Component{
                     </Grid>
                     <Grid container xs={7} spacing={1} className={classes.submit}>
                         <Grid item><Button variant={mailIsSaved ? 'outlined' : 'contained'} color='primary' startIcon={<SaveAltIcon />} onClick={e => this.onSaveMail(e, mail)}>save</Button> </Grid>
-                        <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />}>send</Button> </Grid>
+                        <Grid item><Button variant='outlined' color='primary' startIcon={<SendIcon />} onClick={e => onSendMail(e, mail)}>send</Button> </Grid>
                     </Grid>
                     </> :
                     <Grid container xs={12} className={classes.submit}>
