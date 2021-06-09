@@ -243,7 +243,10 @@ class MailPreview extends Component {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="outlined" color="primary" startIcon={<SendIcon />}>
+                                <Button variant="outlined" 
+                                        color="primary" 
+                                        startIcon={<SendIcon />}
+                                        onClick={(e) => this.props.onSendMail(mail)}>
                                     send
                                 </Button>
                             </Grid>

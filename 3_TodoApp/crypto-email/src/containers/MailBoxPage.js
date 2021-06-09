@@ -34,8 +34,10 @@ class MailBoxPage extends Component {
         super(props);
         this.state = {
             selectedMid: "",
-            mailMap: new Map(),
-        };
+            mailMap: new Map()
+        }
+        MockMailList.forEach(mail => this.state.mailMap.set(mail.id, mail));
+        this.onSendMail = this.onSendMail.bind(this);
     }
 
     componentDidMount = async () => {
@@ -58,14 +60,27 @@ class MailBoxPage extends Component {
     };
 
     onSelectMail = (event, mid) => {
-        this.setState({ selectedMid: mid });
-
+        this.setState({selectedMid: mid})
+    }
+    onSaveMail = (event, mail) => {
+        this.setState(state => {
+            const { id } = mail
+            const newMailMap = new Map(state.mailMap)
+            const newMail = {
+                ...newMailMap.get(id),
+                ...mail
+            }
+            return {mailMap: newMailMap.set(id, newMail)}
+        })
+    }
+    onSendMail = (event, mid) => {
         if (this.props.type === PAGE_TYPE.INBOX) {
             let mail = this.state.mailMap.get(mid);
             mail.isOpen = true;
 
             const state = "Code form solidty";
             // open mail
+            this.props.sendMail(mail);
         }
     };
     onDeleteMail = (event, mid) => {
@@ -126,7 +141,7 @@ class MailBoxPage extends Component {
             console.log(err);
         }
     };
-    onSendMail = (event) => {};
+    onSendMail = this.props.sendMail;
 
     onUploadFile = (event) => {};
 
