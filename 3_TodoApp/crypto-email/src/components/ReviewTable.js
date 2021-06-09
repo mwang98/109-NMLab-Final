@@ -37,7 +37,9 @@ class ReviewTable extends Component {
 
     render() {
         const { selectedIds } = this.state;
-        const { applicationList, onAgreeApplication, onRejectApplication } = this.props;
+        const { pendingApplicationList, onAgreeApplication, onRejectApplication } = this.props;
+
+        console.log(pendingApplicationList)
 
         return (
             <div style={{ height: 730, width: "100%" }}>
@@ -47,7 +49,7 @@ class ReviewTable extends Component {
                     </Grid>
                     <Grid item xs={12}>
                         <DataGrid
-                            rows={applicationList}
+                            rows={pendingApplicationList}
                             columns={this.schema()}
                             pageSize={10}
                             autoHeight

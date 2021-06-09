@@ -3,7 +3,10 @@ import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 
 import ReviewTable from "../components/ReviewTable";
+import ApplicationTable from "../components/ApplicationTable";
 import UserBox from "../components/UserBox";
+
+import Status from "../constants/ApplicationStatus.json";
 
 import certifiedUserList from "../mock/user";
 import applicationList from "../mock/application";
@@ -49,6 +52,7 @@ class CertifiedUserPage extends Component {
         });
     };
 
+    // admin
     onAgreeApplication = async (selectedIds) => {
         this.setState((state) => ({
             applicationList: state.applicationList.filter((doc) => !selectedIds.includes(doc.id)),
@@ -61,19 +65,47 @@ class CertifiedUserPage extends Component {
         }));
     };
 
+    // user
+    onSubmitApplication = async (description) => {
+        const new_application = this.createApplication(description);
+
+        const msg = "Send to blockchain";
+
+        this.setState((state) => ({
+            applicationList: [...state.applicationList, new_application],
+        }));
+    };
+
+    createApplication = (description) => ({
+        id: "123" + description,
+        address: "myAddr",
+        name: "myName",
+        description: description,
+        status: Status.PENDING,
+    });
+
     render() {
         const { classes } = this.props;
         const { applicationList, certifiedUserList } = this.state;
+
+        let pendingApplicationList = applicationList.filter((doc) => doc.status === Status.PENDING);
 
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
-                        <ReviewTable
-                            applicationList={applicationList}
-                            onAgreeApplication={this.onAgreeApplication}
-                            onRejectApplication={this.onRejectApplication}
-                        />
+                        {false ? (
+                            <ReviewTable
+                                pendingApplicationList={pendingApplicationList}
+                                onAgreeApplication={this.onAgreeApplication}
+                                onRejectApplication={this.onRejectApplication}
+                            />
+                        ) : (
+                            <ApplicationTable
+                                applicationList={applicationList}
+                                onSubmitApplication={this.onSubmitApplication}
+                            />
+                        )}
                     </Grid>
                     <Grid item xs={6}>
                         <UserBox userList={certifiedUserList} />
