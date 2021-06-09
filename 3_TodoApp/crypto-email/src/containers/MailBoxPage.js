@@ -5,7 +5,7 @@ import Grid from "@material-ui/core/Grid";
 
 import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
-import MailPreview from "../components/MailPreview";
+import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
 
