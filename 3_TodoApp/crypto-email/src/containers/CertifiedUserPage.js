@@ -49,6 +49,18 @@ class CertifiedUserPage extends Component {
         });
     };
 
+    onAgreeApplication = async (selectedIds) => {
+        this.setState((state) => ({
+            applicationList: state.applicationList.filter((doc) => !selectedIds.includes(doc.id)),
+        }));
+    };
+
+    onRejectApplication = async (selectedIds) => {
+        this.setState((state) => ({
+            applicationList: state.applicationList.filter((doc) => !selectedIds.includes(doc.id)),
+        }));
+    };
+
     render() {
         const { classes } = this.props;
         const { applicationList, certifiedUserList } = this.state;
@@ -57,7 +69,11 @@ class CertifiedUserPage extends Component {
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
-                        <ReviewTable applicationList={applicationList} testProp={123} />
+                        <ReviewTable
+                            applicationList={applicationList}
+                            onAgreeApplication={this.onAgreeApplication}
+                            onRejectApplication={this.onRejectApplication}
+                        />
                     </Grid>
                     <Grid item xs={6}>
                         <UserBox userList={certifiedUserList} />

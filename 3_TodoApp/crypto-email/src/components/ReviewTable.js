@@ -1,25 +1,17 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
 import { DataGrid } from "@material-ui/data-grid";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Button from "@material-ui/core/Button";
 
 class ReviewTable extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            applicationList: [],
+            selectedIds: [],
         };
     }
-
-    componentDidMount = async () => {
-        console.log("componentDidMount");
-        await this.setState(
-            {
-                applicationList: this.props.testProp,
-            },
-            () => console.log("after setsate", this.state.applicationList, this.props.applicationList)
-        );
-        console.log("after mount", this.state.applicationList);
-    };
 
     schema = () => [
         { field: "id", headerName: "ID", width: 100 },
@@ -28,20 +20,49 @@ class ReviewTable extends Component {
         { field: "description", headerName: "Description", width: 300 },
     ];
 
+    onRowSelect = (params) => {
+        const { data, isSelected } = params;
+        const { id } = data;
+        if (isSelected) {
+            this.setState((state) => {
+                state.selectedIds.push(id);
+                return state;
+            });
+        } else {
+            this.setState((state) => ({
+                selectedIds: state.selectedIds.filter((e) => e != id),
+            }));
+        }
+    };
+
     render() {
-        const { applicationList } = this.state;
-        console.log("render state", this.state);
-        console.log("render prop", this.props);
+        const { selectedIds } = this.state;
+        const { applicationList, onAgreeApplication, onRejectApplication } = this.props;
+
         return (
             <div style={{ height: 730, width: "100%" }}>
-                <DataGrid
-                    rows={applicationList}
-                    columns={this.schema()}
-                    pageSize={10}
-                    autoHeight
-                    autoPageSize
-                    checkboxSelection
-                />
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <Typography variant="h4">User Application</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                        <DataGrid
+                            rows={applicationList}
+                            columns={this.schema()}
+                            pageSize={10}
+                            autoHeight
+                            autoPageSize
+                            checkboxSelection
+                            onRowSelected={this.onRowSelect}
+                        />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <ButtonGroup color="primary" variant={selectedIds.length ? "contained" : "outlined"}>
+                            <Button onClick={() => onAgreeApplication(selectedIds)}>Agree</Button>
+                            <Button onClick={() => onRejectApplication(selectedIds)}>Reject</Button>
+                        </ButtonGroup>
+                    </Grid>
+                </Grid>
             </div>
         );
     }
