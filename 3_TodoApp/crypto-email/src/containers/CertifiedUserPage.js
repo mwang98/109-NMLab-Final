@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 
+import ReviewTable from "../components/ReviewTable";
 import UserBox from "../components/UserBox";
 
 import certifiedUserList from "../mock/user";
+import applicationList from "../mock/application";
 
 const styles = (theme) => ({
     root: {
@@ -23,12 +24,14 @@ class CertifiedUserPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            applicationList: [],
             certifiedUserList: [],
         };
     }
 
     componentDidMount = async () => {
         this.retrieveCertifiedUsers();
+        this.retrieveApplications();
     };
 
     retrieveCertifiedUsers = async () => {
@@ -40,14 +43,22 @@ class CertifiedUserPage extends Component {
         // retrieve users from eth networks
     };
 
+    retrieveApplications = async () => {
+        this.setState({
+            applicationList: applicationList,
+        });
+    };
+
     render() {
         const { classes } = this.props;
-        const { certifiedUserList } = this.state;
+        const { applicationList, certifiedUserList } = this.state;
 
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
-                    <Grid item xs={6}></Grid>
+                    <Grid item xs={6}>
+                        <ReviewTable applicationList={applicationList} testProp={123} />
+                    </Grid>
                     <Grid item xs={6}>
                         <UserBox userList={certifiedUserList} />
                     </Grid>

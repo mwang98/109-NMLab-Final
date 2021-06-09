@@ -5,6 +5,7 @@ import Button from "@material-ui/core/Button";
 
 import "./App.css";
 import { PAGE_TYPE } from "./constants/Page";
+import LoginPage from "./containers/LoginPage";
 import NavigationBar from "./containers/NavigationBar";
 import MailBoxPage from "./containers/MailBoxPage";
 import CertifiedUserPage from "./containers/CertifiedUserPage";
@@ -47,6 +48,7 @@ function App() {
             </NavigationBar>
 
             <Switch>
+                <Route path="/login" component={() => <LoginPage />} />
                 <Route path="/inbox" component={() => <MailBoxPage type={PAGE_TYPE.INBOX} />} />
                 <Route path="/outbox" component={() => <MailBoxPage type={PAGE_TYPE.OUTBOX} />} />
                 <Route path="/draft" component={() => <MailBoxPage type={PAGE_TYPE.DRAFT} />} />

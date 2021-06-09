@@ -11,23 +11,6 @@ import TablePagination from "@material-ui/core/TablePagination";
 import UserRow from "./UserRow";
 import SearchBar from "./SearchBar";
 
-function createData(name, address, description) {
-    return {
-        name,
-        address,
-        description,
-    };
-}
-
-const users = [
-    createData("Frozen yoghurt", "test@Frozen-yoghurt.com", "no desciprtion"),
-    createData("Ice cream sandwich", "test@Ice.cream.sandwich.com", "no desciprtion"),
-    createData("Google", "test@google.com", "no desciprtion"),
-    createData("Amazon", "test@amazon.com", "no desciprtion"),
-    createData("Microsoft", "test@microsoft.com", "no desciprtion"),
-    createData("Yahoo", "test@yahoo.com", "no desciprtion"),
-];
-
 class UserBox extends Component {
     constructor(props) {
         super(props);
