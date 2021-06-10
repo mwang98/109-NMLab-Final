@@ -98,7 +98,7 @@ class CertifiedUserPage extends Component {
                             value={description}
                             onChange={this.onChangeDescription}
                         />
-                        <Button variant="outlined" color="primary" onClick={this.onSubmit}>
+                        <Button variant="outlined" onClick={this.onSubmit}>
                             submit
                         </Button>
                     </Grid>

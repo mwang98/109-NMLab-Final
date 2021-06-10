@@ -26,11 +26,11 @@ export default function FormDialog(props) {
 
     const onChange = (event) => {
         setDescription(event.target.value);
-    }
+    };
 
     return (
         <div>
-            <Button variant="outlined" color="primary" onClick={handleClickOpen}>
+            <Button variant="outlined" onClick={handleClickOpen}>
                 Apply
             </Button>
             <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
@@ -40,15 +40,11 @@ export default function FormDialog(props) {
                         To become an officially certified user, please summarize your account here. We will send updates
                         occasionally.
                     </DialogContentText>
-                    <TextField autoFocus margin="dense" label="Description" fullWidth onChange={onChange}/>
+                    <TextField autoFocus margin="dense" label="Description" fullWidth onChange={onChange} />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button onClick={onSubmit} color="primary">
-                        Submit
-                    </Button>
+                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={onSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
         </div>
