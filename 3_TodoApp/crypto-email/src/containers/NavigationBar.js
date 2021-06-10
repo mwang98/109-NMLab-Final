@@ -20,12 +20,6 @@ const styles = (theme) => ({
             display: "block",
         },
     },
-    sectionDesktop: {
-        display: "none",
-        [theme.breakpoints.up("md")]: {
-            display: "flex",
-        },
-    },
     routeBtn: {
         "& > *": {
             margin: theme.spacing(2),
@@ -36,16 +30,16 @@ const styles = (theme) => ({
         color: "white",
         borderColor: "white",
     },
+    link: {
+        color: "white",
+        textDecoration: "none",
+    },
 });
 
 class NavigationBar extends Component {
     constructor(props) {
         super(props);
     }
-
-    handleProfileMenuOpen = (event) => {
-        this.setState({ anchorEl: event.currentTarget });
-    };
 
     render() {
         const { children, classes } = this.props;
@@ -60,22 +54,11 @@ class NavigationBar extends Component {
                         </Typography>
                         <div className={classes.routeBtn}>{children}</div>
                         <div className={classes.grow} />
-                        <Button className={classes.newMailBtn} variant="outlined">
-                            new mail
-                        </Button>
-                        <div className={classes.sectionDesktop}>
-                            <IconButton
-                                edge="end"
-                                aria-label="account of current user"
-                                aria-haspopup="true"
-                                onClick={this.handleProfileMenuOpen}
-                                color="inherit"
-                            >
-                                <NavLink to="/profile">
-                                    <AccountCircle />
-                                </NavLink>
+                        <NavLink to="/profile" className={classes.link}>
+                            <IconButton>
+                                <AccountCircle />
                             </IconButton>
-                        </div>
+                        </NavLink>
                     </Toolbar>
                 </AppBar>
             </div>
