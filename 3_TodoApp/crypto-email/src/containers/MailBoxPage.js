@@ -1,13 +1,14 @@
 import React, { Component } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
+import Button from "@material-ui/core/Button";
 
 import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { DummyMail } from "../constants/Mail";
 
 // mock data
 import MockMailList from "../mock/mail.js";
@@ -33,11 +34,9 @@ class MailBoxPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            selectedMid: "",
-            mailMap: new Map()
-        }
-        MockMailList.forEach(mail => this.state.mailMap.set(mail.id, mail));
-        this.onSendMail = this.onSendMail.bind(this);
+            selectedMid: null,
+            mailMap: new Map(),
+        };
     }
 
     componentDidMount = async () => {
@@ -50,7 +49,6 @@ class MailBoxPage extends Component {
             mailMap: new Map(MockMailList.map((mail) => [mail.id, mail])),
         });
 
-        const state = "Code form solidty";
         // retrieve data from eth networks
     };
 
@@ -60,27 +58,32 @@ class MailBoxPage extends Component {
     };
 
     onSelectMail = (event, mid) => {
-        this.setState({selectedMid: mid})
-    }
+        this.setState({ selectedMid: mid });
+    };
+
     onSaveMail = (event, mail) => {
-        this.setState(state => {
-            const { id } = mail
-            const newMailMap = new Map(state.mailMap)
+        this.setState((state) => {
+            const { id } = mail;
+            const newMailMap = new Map(state.mailMap);
             const newMail = {
                 ...newMailMap.get(id),
-                ...mail
-            }
-            return {mailMap: newMailMap.set(id, newMail)}
-        })
-    }
-    onSendMail = (event, mid) => {
+                ...mail,
+            };
+            return { mailMap: newMailMap.set(id, newMail) };
+        });
+    };
+
+    onSendMail = async (event, mail) => {
+        const { contract, accounts } = this.props;
+
+        console.log(contract, accounts);
+        console.log(mail);
+
         if (this.props.type === PAGE_TYPE.INBOX) {
-            let mail = this.state.mailMap.get(mid);
             mail.isOpen = true;
 
             const state = "Code form solidty";
             // open mail
-            this.props.sendMail(mail);
         }
     };
     onDeleteMail = (event, mid) => {
@@ -111,13 +114,6 @@ class MailBoxPage extends Component {
                     const IPFSHash = "ipfs-hash-not-available";
 
                     const state = "Code form solidty";
-                    // upload to blockchain
-                    // const { accounts, contract } = this.props;
-                    // console.log(accounts);
-                    // let status = await contract.methods
-                    //     .Upload([this.state.fileName, this.state.fileType, mainIPFSHash, previewIPFSHash, accounts[0]])
-                    //     .send({ from: accounts[0] });
-                    // console.log("upload status", status);
 
                     content.IPFSHash = IPFSHash;
 
@@ -141,26 +137,61 @@ class MailBoxPage extends Component {
             console.log(err);
         }
     };
-    onSendMail = this.props.sendMail;
 
     onUploadFile = (event) => {};
+
+    onCreateMail = (event) => {
+        const { accounts } = this.props;
+        if (!accounts) return;
+
+        // create new mail
+        console.log("create new mail");
+        const mid = uuidv4();
+        const newMail = {
+            id: mid,
+            subject: "New Mail",
+            senderAddr: accounts[0],
+            senderName: "NOT_IMPLEMENTED", // getUserProfile -> name
+            receiverAddr: "",
+            receiverName: "",
+            timestamp: "",
+            contents: "",
+            multiMediaContents: [],
+            isOpen: false,
+        };
+
+        this.setState((state) => ({
+            selectedMid: mid,
+            mailMap: state.mailMap.set(mid, newMail),
+        }));
+    };
 
     render() {
         const { classes, type } = this.props;
         const { mailMap, selectedMid } = this.state;
-        const mail = mailMap.has(selectedMid) ? mailMap.get(selectedMid) : DummyMail;
 
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
-                            <MailPreview
-                                mail={mail}
-                                pageType={type}
-                                onSaveMail={this.onSaveMail}
-                                onSendMail={this.onSendMail}
-                            />
+                            {type === PAGE_TYPE.DRAFT ? (
+                                <Button variant="outlined" onClick={this.onCreateMail}>
+                                    new mail
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+                            {selectedMid ? (
+                                <MailPreview
+                                    mail={mailMap.get(selectedMid)}
+                                    pageType={type}
+                                    onSaveMail={this.onSaveMail}
+                                    onSendMail={this.onSendMail}
+                                />
+                            ) : (
+                                <></>
+                            )}
                         </Paper>
                     </Grid>
                     <Grid item xs={6}>
