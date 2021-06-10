@@ -79,11 +79,31 @@ class MailBoxPage extends Component {
         console.log(contract, accounts);
         console.log(mail);
 
+        /****************************************** example ******************************************/
+        if (mail.senderAddr !== accounts[0]) {
+            console.log(`sender should be the account!!! ${accounts[0]}`);
+            return;
+        }
+        var mail_sol = [
+            mail.id,
+            mail.senderAddr,
+            mail.receiverAddr,
+            mail.subject,
+            mail.timestamp,
+            mail.contents,
+            mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash]}),
+            mail.isOpen,
+        ];
+        console.log(mail_sol);
+        await contract.methods.sendMail(mail_sol).send({ from: mail.senderAddr });
+        /*********************************************************************************************/
+
         if (this.props.type === PAGE_TYPE.INBOX) {
             mail.isOpen = true;
 
             const state = "Code form solidty";
             // open mail
+            
         }
     };
     onDeleteMail = (event, mid) => {
