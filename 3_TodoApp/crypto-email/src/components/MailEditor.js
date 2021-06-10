@@ -6,17 +6,15 @@ import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-import InsertPhotoIcon from "@material-ui/icons/InsertPhoto";
 import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
-import VideoLibraryIcon from "@material-ui/icons/VideoLibrary";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import SendIcon from "@material-ui/icons/Send";
-import ReplyIcon from "@material-ui/icons/Reply";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
 import { PAGE_TYPE } from "../constants/Page";
+import { DummyMail } from "../constants/Mail";
 
 const styles = (theme) => ({
     root: {
@@ -36,20 +34,19 @@ const styles = (theme) => ({
     },
 });
 
-class MailPreview extends Component {
+class MailEditor extends Component {
     constructor(props) {
         super(props);
 
-        const { mail } = props;
-
         this.state = {
-            mail: mail,
+            mail: DummyMail, // for render
             fileList: new Map(),
             mailIsSaved: true,
         };
     }
 
     static getDerivedStateFromProps(props, state) {
+        if (!props.mail || !state.mail) return null;
         if (state.mail.id !== props.mail.id) {
             return { mail: props.mail, fileList: new Map(), mailIsSaved: true };
         }
@@ -196,7 +193,6 @@ class MailPreview extends Component {
                     </Grid>
                     <Grid item xs={2}>
                         <Button
-                            color="primary"
                             variant={isOpen ? "contained" : "outlined"}
                             startIcon={isOpen ? <VisibilityIcon /> : <VisibilityOffIcon />}
                         >
@@ -220,14 +216,14 @@ class MailPreview extends Component {
                 </Grid>
                 {!readOnly ? (
                     <>
-                        <Grid item xs={12}>
+                        <Grid container xs={12}>
                             {[...this.state.fileList.values()].map((file) => (
                                 <AttachFile filename={file.fileName} />
                             ))}
                         </Grid>
                         <Grid container xs={5} className={classes.upload}>
                             <Button>
-                                <PictureAsPdfIcon color="primary" />
+                                <PictureAsPdfIcon />
                                 <input type="file" onChange={this.onUploadFile} />
                             </Button>
                         </Grid>
@@ -235,7 +231,6 @@ class MailPreview extends Component {
                             <Grid item>
                                 <Button
                                     variant={mailIsSaved ? "outlined" : "contained"}
-                                    color="primary"
                                     startIcon={<SaveAltIcon />}
                                     onClick={(e) => this.onSaveMail(e, mail)}
                                 >
@@ -243,10 +238,12 @@ class MailPreview extends Component {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="outlined" 
-                                        color="primary" 
-                                        startIcon={<SendIcon />}
-                                        onClick={(e) => this.props.onSendMail(mail)}>
+                                <Button
+                                    variant="outlined"
+                                    disabled={mailIsSaved ? false : true}
+                                    startIcon={<SendIcon />}
+                                    onClick={(e) => onSendMail(e, mail)}
+                                >
                                     send
                                 </Button>
                             </Grid>
@@ -259,13 +256,6 @@ class MailPreview extends Component {
                                 <AttachFile filename={file.fileName} />
                             ))}
                         </Grid>
-                        <Grid container xs={12} className={classes.submit}>
-                            <Grid item xs={3}>
-                                <Button variant="outlined" color="primary" startIcon={<ReplyIcon />}>
-                                    reply
-                                </Button>
-                            </Grid>
-                        </Grid>
                     </>
                 )}
             </Grid>
@@ -273,4 +263,4 @@ class MailPreview extends Component {
     }
 }
 
-export default withStyles(styles)(MailPreview);
+export default withStyles(styles)(MailEditor);
