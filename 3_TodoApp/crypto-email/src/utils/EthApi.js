@@ -99,12 +99,30 @@ class EthApi {
         ];
         await this.contract.methods.openMail(mail_sol).send({ from: mail.receiverAddr });
     };
-    getUserName = async (userAddress) => {
-        if (userAddress !== this.accounts[0]) {
+    setUser = async (userAddress, user) => { /*user example = {name:"Robert",
+                                                               addr:"0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+                                                               description:"nothing",
+                                                               icon:{ fileName: "app.js", fileType: "text", IPFSHash: "cb3d0adb4559ae79568a8169d1b8d6" },
+                                                               isCertified:true}*/
+        if (userAddress !== this.state.accounts[0]) {
             console.log("userAddress should be the account!!!");
             return;
         }
-        var result = await this.contract.methods.getUserName(userAddress).call();
+        var user_sol = [
+            user.name, 
+            user.addr,
+            user.description,
+            this.multiMediaContentsToarray(user.icon),
+            user.isCertified
+        ];
+        await this.state.contract.methods.setUser(userAddress, user_sol[0], user_sol[1], user_sol[2], user_sol[3], user_sol[4]).send({ from: userAddress });
+    };
+    getUser = async (userAddress) => {
+        if (userAddress !== this.state.accounts[0]) {
+            console.log("userAddress should be the account!!!");
+            return;
+        }
+        var result = await this.state.contract.methods.getUser(userAddress).call();
         console.log(result);
     };
     getInboxMails = async (userAddress) => {
