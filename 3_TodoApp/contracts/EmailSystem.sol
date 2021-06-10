@@ -19,14 +19,27 @@ contract EmailSystem {
         string[3][] multimediaContents; // IPFS hash values
         bool isOpen;
     }
-
+/*
+USER
+  name: str,
+  addr: public_key,
+  description: str,
+  icon: MultiMediaContents,
+  inbox: List[Mail],
+  outbox: List[Mail],
+  draftbox: List[Mail],
+  isCertified: bool,
+  applications: List[Application]
+*/
     struct User {
         string name;
         string public_key;
-        address addr;
+        string description;
+        string[3] icon;
         MailBox inbox;
         MailBox outbox;
         MailBox draftbox;
+        bool isCertified;
     }
     address adminAddr;
 
@@ -46,25 +59,30 @@ contract EmailSystem {
         _;
     }
     modifier isUserExists(address _addr) {
-        require(generalUsers[_addr].addr != address(0));
+        string memory _s;
+        require(keccak256(bytes(generalUsers[_addr].public_key)) != keccak256(bytes(_s)));
         _;
     }
     modifier isUserNotExists(address _addr) {
-        require(generalUsers[_addr].addr == address(0));
+        string memory _s;
+        require(keccak256(bytes(generalUsers[_addr].public_key)) == keccak256(bytes(_s)));
         _;
     }
 
     // Public function
-    function addUser(string memory _name, string memory _public_key)
+    function setUser
+        (address          _addr,
+         string    memory _name, 
+         string    memory _public_key, 
+         string    memory discription, 
+         string[3] memory icon,
+         bool             isCertified)
         public
-        isUserNotExists(msg.sender)
-        returns (bool)
     {
         MailBox memory inbox;
         MailBox memory outbox;
         MailBox memory draftbox;
-        generalUsers[msg.sender] = User(_name, _public_key, msg.sender, inbox, outbox, draftbox);
-        return true;
+        generalUsers[_addr] = User(_name, _public_key, discription, icon, inbox, outbox, draftbox, isCertified);
     }
 
     function addCorporateUser(address _addr)
@@ -78,7 +96,8 @@ contract EmailSystem {
     }
 
     function validateCorporateUser(address _addr) public view returns (bool) {
-        return verifiedUsers[_addr].addr != address(0);
+        string memory _s;
+        return (keccak256(bytes(verifiedUsers[_addr].public_key)) != keccak256(bytes(_s)));
     }
 
     function sendMail(Mail memory _mail) public returns (bool) {
@@ -294,7 +313,11 @@ contract EmailSystem {
         }
         return ret;
     }
-
+    function getUser(address _addr) public view 
+        returns (string memory, string memory, string memory ,string[3] memory, bool){
+        User memory _u = generalUsers[_addr];
+        return (_u.name, _u.public_key, _u.description, _u.icon, _u.isCertified);
+    }
     function openMail(Mail memory _mail) public {
         string memory uuid = _mail.uuid;
         mails[uuid].isOpen = true;
