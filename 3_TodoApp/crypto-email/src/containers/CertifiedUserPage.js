@@ -8,7 +8,7 @@ import UserBox from "../components/UserBox";
 
 import Status from "../constants/ApplicationStatus.json";
 
-import certifiedUserList from "../mock/user";
+import certifiedUserList from "../mock/user.json";
 import applicationList from "../mock/application";
 
 const styles = (theme) => ({
