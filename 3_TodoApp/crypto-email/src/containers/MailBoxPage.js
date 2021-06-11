@@ -74,20 +74,19 @@ class MailBoxPage extends Component {
         return result.value.path;
     };
 
+    packMailToUpload = (mail) => [
+        mail.id,
+        mail.senderAddr,
+        mail.receiverAddr,
+        mail.subject,
+        mail.timestamp,
+        mail.contents,
+        mail.multiMediaContents,
+        mail.isOpen,
+    ];
+
     onSelectMail = (event, mid) => {
         this.setState({ selectedMid: mid });
-    };
-
-    onSaveMail = (event, mail) => {
-        this.setState((state) => {
-            const { id } = mail;
-            const newMailMap = new Map(state.mailMap);
-            const newMail = {
-                ...newMailMap.get(id),
-                ...mail,
-            };
-            return { mailMap: newMailMap.set(id, newMail) };
-        });
     };
 
     onSendMail = async (event, mail) => {
@@ -137,6 +136,22 @@ class MailBoxPage extends Component {
     onSaveMail = async (event, mail) => {
         event.preventDefault();
 
+        const { userAddr } = this.state;
+        const { contract } = this.props;
+        if (!contract) return;
+
+        // receiver exsit
+        try {
+            var receiverProfile = await contract.methods.getUser(mail.receiverAddr).call();
+            if (receiverProfile[0] === "") {
+                throw `${mail.receiverAddr} not exists`;
+            }
+            mail.receiverName = receiverProfile[0];
+        } catch (err) {
+            alert(receiverProfile ? `${mail.receiverAddr} not exists` : `${mail.receiverAddr} is invalid address`);
+            return;
+        }
+
         // ipfs
         console.log(ipfs.getEndpointConfig());
         console.log(ipfs);
@@ -159,18 +174,12 @@ class MailBoxPage extends Component {
                 })
             );
 
-            console.log(multiMediaContents);
+            // eth network
+            var mailUpload = this.packMailToUpload(mail);
+            await contract.methods.saveMail(userAddr, mailUpload).send({ from: userAddr });
 
             // client
-            this.setState((state) => {
-                const newMail = {
-                    ...mail,
-                    multiMediaContents: multiMediaContents,
-                };
-                return { mailMap: state.mailMap.set(id, newMail) };
-            });
-
-            console.log("FINISH!");
+            this.setState((state) => ({ mailMap: state.mailMap.set(id, mail) }));
         } catch (err) {
             console.log(err);
         }
