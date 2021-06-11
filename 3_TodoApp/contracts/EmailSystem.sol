@@ -6,7 +6,7 @@ contract EmailSystem {
     event OnSendMail(uint256 mid);
 
     struct MailBox {
-        uint256[] mail_ids;
+        uint256[] mailIds;
     }
 
     struct Mail {
@@ -19,21 +19,9 @@ contract EmailSystem {
         string[3][] multimediaContents; // IPFS hash values
         bool isOpen;
     }
-/*
-USER
-  name: str,
-  addr: public_key,
-  description: str,
-  icon: MultiMediaContents,
-  inbox: List[Mail],
-  outbox: List[Mail],
-  draftbox: List[Mail],
-  isCertified: bool,
-  applications: List[Application]
-*/
     struct User {
         string name;
-        string public_key;
+        string pubKey;
         string description;
         string[3] icon;
         MailBox inbox;
@@ -54,26 +42,26 @@ USER
     }
 
     // Modifier
-    modifier isAdmin(address _addr) {
-        require(_addr == adminAddr);
+    modifier isAdmin(address addr) {
+        require(addr == adminAddr);
         _;
     }
-    modifier isUserExists(address _addr) {
-        string memory _s;
-        require(keccak256(bytes(generalUsers[_addr].public_key)) != keccak256(bytes(_s)));
+    modifier isUserExists(address addr) {
+        string memory s;
+        require(keccak256(bytes(generalUsers[addr].pubKey)) != keccak256(bytes(s)));
         _;
     }
-    modifier isUserNotExists(address _addr) {
-        string memory _s;
-        require(keccak256(bytes(generalUsers[_addr].public_key)) == keccak256(bytes(_s)));
+    modifier isUserNotExists(address addr) {
+        string memory s;
+        require(keccak256(bytes(generalUsers[addr].pubKey)) == keccak256(bytes(s)));
         _;
     }
 
     // Public function
     function setUser
-        (address          _addr,
-         string    memory _name, 
-         string    memory _public_key, 
+        (address          addr,
+         string    memory name, 
+         string    memory pubKey, 
          string    memory discription, 
          string[3] memory icon,
          bool             isCertified)
@@ -82,97 +70,97 @@ USER
         MailBox memory inbox;
         MailBox memory outbox;
         MailBox memory draftbox;
-        generalUsers[_addr] = User(_name, _public_key, discription, icon, inbox, outbox, draftbox, isCertified);
+        generalUsers[addr] = User(name, pubKey, discription, icon, inbox, outbox, draftbox, isCertified);
     }
 
-    function addCorporateUser(address _addr)
+    function addCorporateUser(address addr)
         public
         isAdmin(msg.sender)
-        isUserExists(_addr)
+        isUserExists(addr)
         returns (bool)
     {
-        verifiedUsers[_addr] = generalUsers[_addr];
+        verifiedUsers[addr] = generalUsers[addr];
         return true;
     }
 
-    function validateCorporateUser(address _addr) public view returns (bool) {
-        string memory _s;
-        return (keccak256(bytes(verifiedUsers[_addr].public_key)) != keccak256(bytes(_s)));
+    function validateCorporateUser(address addr) public view returns (bool) {
+        string memory s;
+        return (keccak256(bytes(verifiedUsers[addr].pubKey)) != keccak256(bytes(s)));
     }
 
-    function sendMail(Mail memory _mail) public returns (bool) {
-        if( mailExist(_mail.uuid)){
-            mails[_mail.uuid] = _mail;
+    function sendMail(Mail memory mail) public returns (bool) {
+        if( mailExist(mail.uuid)){
+            mails[mail.uuid] = mail;
             uint256 id=0;
             for(; id < id2uuids.length; ++id){
-                if(keccak256(bytes(id2uuids[id])) == keccak256(bytes(_mail.uuid))) break;
+                if(keccak256(bytes(id2uuids[id])) == keccak256(bytes(mail.uuid))) break;
             }
-            for(uint256 i=0; i<generalUsers[_mail.senderAddr].outbox.mail_ids.length; ++i){
-                if(generalUsers[_mail.senderAddr].outbox.mail_ids[i]==id)return false;
+            for(uint256 i=0; i<generalUsers[mail.senderAddr].outbox.mailIds.length; ++i){
+                if(generalUsers[mail.senderAddr].outbox.mailIds[i]==id)return false;
             }
-            for(uint256 i=0; i<generalUsers[_mail.senderAddr].inbox.mail_ids.length; ++i){
-                if(generalUsers[_mail.senderAddr].inbox.mail_ids[i]==id)return false;
+            for(uint256 i=0; i<generalUsers[mail.senderAddr].inbox.mailIds.length; ++i){
+                if(generalUsers[mail.senderAddr].inbox.mailIds[i]==id)return false;
             }
             bool found = false;
-            for(uint256 i=0; i<generalUsers[_mail.senderAddr].draftbox.mail_ids.length; ++i){
-                if(generalUsers[_mail.senderAddr].inbox.mail_ids[i]==id){
+            for(uint256 i=0; i<generalUsers[mail.senderAddr].draftbox.mailIds.length; ++i){
+                if(generalUsers[mail.senderAddr].inbox.mailIds[i]==id){
                     found = true;
                     break;
                 }
             }
             if(found == false) return false;
-            generalUsers[_mail.senderAddr].outbox.mail_ids.push(id);
-            generalUsers[_mail.receiverAddr].inbox.mail_ids.push(id);
+            generalUsers[mail.senderAddr].outbox.mailIds.push(id);
+            generalUsers[mail.receiverAddr].inbox.mailIds.push(id);
             
             // remove from draftbox
             uint256 index=0;
-            uint256 length = generalUsers[_mail.senderAddr].draftbox.mail_ids.length;
+            uint256 length = generalUsers[mail.senderAddr].draftbox.mailIds.length;
             found = false;
             for(; index < length; ++index){
-                if( generalUsers[_mail.senderAddr].draftbox.mail_ids[index] == id){
+                if( generalUsers[mail.senderAddr].draftbox.mailIds[index] == id){
                     found = true;
                     break;
                 }
             }
             if(found == true){            
                 for(uint256 i=index; i+1 < length; ++i){
-                    generalUsers[_mail.senderAddr].draftbox.mail_ids[i] =
-                    generalUsers[_mail.senderAddr].draftbox.mail_ids[i+1];
+                    generalUsers[mail.senderAddr].draftbox.mailIds[i] =
+                    generalUsers[mail.senderAddr].draftbox.mailIds[i+1];
                 }
                 if(length > 0){
-                    delete generalUsers[_mail.senderAddr].draftbox.mail_ids[length-1];
-                    generalUsers[_mail.senderAddr].draftbox.mail_ids.length--;
+                    delete generalUsers[mail.senderAddr].draftbox.mailIds[length-1];
+                    generalUsers[mail.senderAddr].draftbox.mailIds.length--;
                 }
             }
             return true;
         }
         else{
             uint256 id = id2uuids.length;
-            id2uuids.push(_mail.uuid);
-            mails[_mail.uuid] = _mail;
-            generalUsers[_mail.senderAddr].outbox.mail_ids.push(id);
-            generalUsers[_mail.receiverAddr].inbox.mail_ids.push(id);
+            id2uuids.push(mail.uuid);
+            mails[mail.uuid] = mail;
+            generalUsers[mail.senderAddr].outbox.mailIds.push(id);
+            generalUsers[mail.receiverAddr].inbox.mailIds.push(id);
             return true;
         }
     }
-    function saveMail(address _addr, Mail memory _mail) public returns (bool) {
-        if( mailExist(_mail.uuid)){
-            mails[_mail.uuid] = _mail;
+    function saveMail(address addr, Mail memory mail) public returns (bool) {
+        if( mailExist(mail.uuid)){
+            mails[mail.uuid] = mail;
             return true;
         }
         else{
             uint256 id = id2uuids.length;
-            id2uuids.push(_mail.uuid);
-            mails[_mail.uuid] = _mail;
-            generalUsers[_addr].draftbox.mail_ids.push(id);
+            id2uuids.push(mail.uuid);
+            mails[mail.uuid] = mail;
+            generalUsers[addr].draftbox.mailIds.push(id);
             return true;
         }
     }
-    function deleteMail(address _addr, Mail memory _mail) public returns (bool) {
-        if( mailExist(_mail.uuid)){
+    function deleteMail(address addr, Mail memory mail) public returns (bool) {
+        if( mailExist(mail.uuid)){
             uint256 id=0;
             for(; id < id2uuids.length; ++id){
-                if(keccak256(bytes(id2uuids[id])) == keccak256(bytes(_mail.uuid))) break;
+                if(keccak256(bytes(id2uuids[id])) == keccak256(bytes(mail.uuid))) break;
             }
             
             uint256 index;
@@ -180,62 +168,62 @@ USER
             bool found;
             // delete from draftbox
             index=0;
-            length = generalUsers[_addr].draftbox.mail_ids.length;
+            length = generalUsers[addr].draftbox.mailIds.length;
             found = false;
             for(; index < length; ++index){
-                if( generalUsers[_addr].draftbox.mail_ids[index] == id){
+                if( generalUsers[addr].draftbox.mailIds[index] == id){
                     found = true;
                     break;
                 }
             }
             if(found == true){
                 for(uint256 i=index; i+1 < length; ++i){
-                    generalUsers[_addr].draftbox.mail_ids[i] =
-                    generalUsers[_addr].draftbox.mail_ids[i+1];
+                    generalUsers[addr].draftbox.mailIds[i] =
+                    generalUsers[addr].draftbox.mailIds[i+1];
                 }
                 if(length > 0){
-                    delete generalUsers[_addr].draftbox.mail_ids[length-1];
-                    generalUsers[_addr].draftbox.mail_ids.length--;
+                    delete generalUsers[addr].draftbox.mailIds[length-1];
+                    generalUsers[addr].draftbox.mailIds.length--;
                 }
             }
             // delete from inbox
             index=0;
-            length = generalUsers[_addr].inbox.mail_ids.length;
+            length = generalUsers[addr].inbox.mailIds.length;
             found = false;
             for(; index < length; ++index){
-                if( generalUsers[_addr].inbox.mail_ids[index] == id){
+                if( generalUsers[addr].inbox.mailIds[index] == id){
                     found = true;
                     break;
                 }
             }
             if(found == true){
                 for(uint256 i=index; i+1 < length; ++i){
-                    generalUsers[_addr].inbox.mail_ids[i] =
-                    generalUsers[_addr].inbox.mail_ids[i+1];
+                    generalUsers[addr].inbox.mailIds[i] =
+                    generalUsers[addr].inbox.mailIds[i+1];
                 }
                 if(length > 0){
-                    delete generalUsers[_addr].inbox.mail_ids[length-1];
-                    generalUsers[_addr].inbox.mail_ids.length--;
+                    delete generalUsers[addr].inbox.mailIds[length-1];
+                    generalUsers[addr].inbox.mailIds.length--;
                 }
             }
             // delete from outbox
             index=0;
-            length = generalUsers[_addr].outbox.mail_ids.length;
+            length = generalUsers[addr].outbox.mailIds.length;
             found = true;
             for(; index < length; ++index){
-                if( generalUsers[_addr].outbox.mail_ids[index] == id){
+                if( generalUsers[addr].outbox.mailIds[index] == id){
                     found = true;
                     break;
                 }
             }
             if(found == true){
                 for(uint256 i=index; i+1 < length; ++i){
-                    generalUsers[_addr].outbox.mail_ids[i] =
-                    generalUsers[_addr].outbox.mail_ids[i+1];
+                    generalUsers[addr].outbox.mailIds[i] =
+                    generalUsers[addr].outbox.mailIds[i+1];
                 }
                 if(length > 0){
-                    delete generalUsers[_addr].outbox.mail_ids[length-1];
-                    generalUsers[_addr].outbox.mail_ids.length--;
+                    delete generalUsers[addr].outbox.mailIds[length-1];
+                    generalUsers[addr].outbox.mailIds.length--;
                 }
             }
             return true;
@@ -246,91 +234,91 @@ USER
     }
     function mailExist(string memory uuid) public view returns(bool) {
         Mail memory m = mails[uuid];
-        address _a;
-        string memory _s;
-        if(keccak256(bytes(m.uuid)) != keccak256(bytes(_s))){return true;}
-        if(m.senderAddr != _a){return true;}
-        if(m.receiverAddr != _a){return true;}
-        if(keccak256(bytes(m.subject)) != keccak256(bytes(_s))){return true;}
-        if(keccak256(bytes(m.timestamp)) != keccak256(bytes(_s))){return true;}
-        if(keccak256(bytes(m.contents)) != keccak256(bytes(_s))){return true;}
+        address a;
+        string memory s;
+        if(keccak256(bytes(m.uuid)) != keccak256(bytes(s))){return true;}
+        if(m.senderAddr != a){return true;}
+        if(m.receiverAddr != a){return true;}
+        if(keccak256(bytes(m.subject)) != keccak256(bytes(s))){return true;}
+        if(keccak256(bytes(m.timestamp)) != keccak256(bytes(s))){return true;}
+        if(keccak256(bytes(m.contents)) != keccak256(bytes(s))){return true;}
         if(m.multimediaContents.length != 0){return true;}
         if(m.isOpen != false){return true;}
         return false;
     }
     
-    function getInboxMail_ids(address _addr) public view returns (uint256[] memory) {
-        uint256 numMail = generalUsers[_addr].inbox.mail_ids.length;
+    function getInboxMailIds(address addr) public view returns (uint256[] memory) {
+        uint256 numMail = generalUsers[addr].inbox.mailIds.length;
         uint256[] memory ret = new uint256[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].inbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].inbox.mailIds[i];
             ret[i] = mid;
         }
         return ret;
     }
-    function getInboxMails(address _addr) public view returns (Mail[] memory) {
-        uint256 numMail = generalUsers[_addr].inbox.mail_ids.length;
+    function getInboxMails(address addr) public view returns (Mail[] memory) {
+        uint256 numMail = generalUsers[addr].inbox.mailIds.length;
         Mail[] memory ret = new Mail[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].inbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].inbox.mailIds[i];
             ret[i] = mails[id2uuids[mid]];
         }
         return ret;
     }
-    function getOutboxMail_ids(address _addr) public view returns (uint256[] memory) {
-        uint256 numMail = generalUsers[_addr].outbox.mail_ids.length;
+    function getOutboxMailIds(address addr) public view returns (uint256[] memory) {
+        uint256 numMail = generalUsers[addr].outbox.mailIds.length;
         uint256[] memory ret = new uint256[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].outbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].outbox.mailIds[i];
             ret[i] = mid;
         }
         return ret;
     }
-    function getOutboxMails(address _addr) public view returns (Mail[] memory) {
-        uint256 numMail = generalUsers[_addr].outbox.mail_ids.length;
+    function getOutboxMails(address addr) public view returns (Mail[] memory) {
+        uint256 numMail = generalUsers[addr].outbox.mailIds.length;
         Mail[] memory ret = new Mail[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].outbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].outbox.mailIds[i];
             ret[i] = mails[id2uuids[mid]];
         }
         return ret;
     }
-    function getDraftboxMail_ids(address _addr) public view returns (uint256[] memory) {
-        uint256 numMail = generalUsers[_addr].draftbox.mail_ids.length;
+    function getDraftboxMailIds(address addr) public view returns (uint256[] memory) {
+        uint256 numMail = generalUsers[addr].draftbox.mailIds.length;
         uint256[] memory ret = new uint256[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].draftbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].draftbox.mailIds[i];
             ret[i] = mid;
         }
         return ret;
     }
-    function getDraftboxMails(address _addr) public view returns (Mail[] memory) {
-        uint256 numMail = generalUsers[_addr].draftbox.mail_ids.length;
+    function getDraftboxMails(address addr) public view returns (Mail[] memory) {
+        uint256 numMail = generalUsers[addr].draftbox.mailIds.length;
         Mail[] memory ret = new Mail[](numMail);
         for (uint256 i = 0; i < numMail; i++) {
-            uint256 mid = generalUsers[_addr].draftbox.mail_ids[i];
+            uint256 mid = generalUsers[addr].draftbox.mailIds[i];
             ret[i] = mails[id2uuids[mid]];
         }
         return ret;
     }
-    function getUser(address _addr) public view 
+    function getUser(address addr) public view 
         returns (string memory, string memory, string memory ,string[3] memory, bool){
-        User memory _u = generalUsers[_addr];
-        return (_u.name, _u.public_key, _u.description, _u.icon, _u.isCertified);
+        User memory u = generalUsers[addr];
+        return (u.name, u.pubKey, u.description, u.icon, u.isCertified);
     }
-    function openMail(Mail memory _mail) public {
-        string memory uuid = _mail.uuid;
+    function openMail(Mail memory mail) public {
+        string memory uuid = mail.uuid;
         mails[uuid].isOpen = true;
         emit OnOpenMail(msg.sender, uuid);
     }
 
-    function addAdmin(address _addr)
+    function addAdmin(address addr)
         public
         isAdmin(msg.sender)
-        isUserExists(_addr)
+        isUserExists(addr)
         returns (bool)
     {
-        verifiedUsers[_addr] = generalUsers[_addr];
+        verifiedUsers[addr] = generalUsers[addr];
         return true;
     }
 }
