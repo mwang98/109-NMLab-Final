@@ -6,5 +6,5 @@ with open(sys.argv[1]) as f:
 
 for datum in data:
     print(datum[0])
-    print("0x"+''.join(list(map(lambda x: hex(x)[2:], datum[1]['publicKey']['data']))))
-    print("0x"+''.join(list(map(lambda x: hex(x)[2:], datum[1]['secretKey']['data']))), end='\n\n')
+    print("0x"+''.join(list(map(lambda x: hex(x)[2:].zfill(2), datum[1]['publicKey']['data']))))
+    print("0x"+''.join(list(map(lambda x: hex(x)[2:].zfill(2), datum[1]['secretKey']['data']))), end='\n\n')
