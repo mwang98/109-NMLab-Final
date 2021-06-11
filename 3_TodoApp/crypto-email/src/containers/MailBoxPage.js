@@ -84,7 +84,8 @@ class MailBoxPage extends Component {
             mailBox.map(async (mail) => {
                 const receiverName = (await contract.methods.getUser(mail.receiverAddr).call())[0];
                 const senderName = (await contract.methods.getUser(mail.senderAddr).call())[0];
-                newMailMap.set(mail.uuid, { ...mail, receiverName, senderName });
+                const timestamp = parseInt(mail.timestamp, 10);
+                newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName });
             })
         );
         await this.setState({
@@ -102,31 +103,22 @@ class MailBoxPage extends Component {
     };
 
     onSendMail = async (event, mail) => {
-        const { contract, accounts } = this.props;
+        const { contract } = this.props;
 
-        console.log(contract, accounts);
         console.log(mail);
 
-        /****************************************** example ******************************************/
-        if (mail.senderAddr !== accounts[0]) {
-            console.log(`sender should be the account!!! ${accounts[0]}`);
-            return;
-        }
-        var mail_sol = [
-            mail.id,
-            mail.senderAddr,
-            mail.receiverAddr,
-            mail.subject,
-            mail.timestamp,
-            mail.contents,
-            mail.multiMediaContents.map((_var) => {
-                return [_var.fileName, _var.fileType, _var.IPFSHash];
-            }),
-            mail.isOpen,
-        ];
-        console.log(mail_sol);
-        await contract.methods.sendMail(mail_sol).send({ from: mail.senderAddr });
-        /*********************************************************************************************/
+        await contract.methods
+            .sendMail([
+                mail.uuid,
+                mail.senderAddr,
+                mail.receiverAddr,
+                mail.subject,
+                mail.timestamp,
+                mail.contents,
+                mail.multiMediaContents,
+                mail.isOpen,
+            ])
+            .send({ from: mail.senderAddr });
 
         if (this.props.type === PAGE_TYPE.INBOX) {
             mail.isOpen = true;
