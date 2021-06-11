@@ -49,8 +49,8 @@ class MailBoxPage extends Component {
         if (!accounts || !contract) return;
 
         const address = accounts[0];
-
         var profile = await contract.methods.getUser(address).call();
+
 
         this.setState({
             userAddr: address,
@@ -65,8 +65,26 @@ class MailBoxPage extends Component {
         this.setState({
             mailMap: new Map(MockMailList.map((mail) => [mail.id, mail])),
         });
+        const { userAddr } = this.state;
+        const { contract, type } = this.props;
+
+        if (!contract) return;
 
         // retrieve data from eth networks
+        var mailBox = [];
+        var newMailMap = new Map();
+        switch (type) {
+            case PAGE_TYPE.INBOX:
+                mailBox = await contract.methods.getInboxMails(userAddr).call();
+            case PAGE_TYPE.OUTBOX:
+                mailBox = await contract.methods.getOutboxMails(userAddr).call();
+            case PAGE_TYPE.DRAFT:
+                mailBox = await contract.methods.getDraftboxMails(userAddr).call();
+        }
+        mailBox.map((mail) => newMailMap.set(mail.uuid, mail));
+        await this.setState({
+            mailMap: newMailMap,
+        });
     };
 
     uploadFile = async (buffer) => {
@@ -176,7 +194,18 @@ class MailBoxPage extends Component {
 
             // eth network
             var mailUpload = this.packMailToUpload(mail);
-            await contract.methods.saveMail(userAddr, mailUpload).send({ from: userAddr });
+            await contract.methods
+                .saveMail(userAddr, [
+                    mail.uuid,
+                    mail.senderAddr,
+                    mail.receiverAddr,
+                    mail.subject,
+                    mail.timestamp,
+                    mail.contents,
+                    mail.multiMediaContents,
+                    mail.isOpen,
+                ])
+                .send({ from: userAddr });
 
             // client
             this.setState((state) => ({ mailMap: state.mailMap.set(id, mail) }));
@@ -193,10 +222,9 @@ class MailBoxPage extends Component {
         if (!accounts) return;
 
         // create new mail
-        var mid = uuidv4();
-
+        const mid = uuidv4();
         const newMail = {
-            id: mid,
+            uuid: mid,
             subject: "<subject>",
             senderAddr: userAddr,
             senderName: userName,
