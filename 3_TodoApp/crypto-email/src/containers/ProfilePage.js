@@ -4,8 +4,7 @@ import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-
-import mockUsers from "../mock/user.json";
+import InputLabel from "@material-ui/core/InputLabel";
 
 const styles = (theme) => ({
     container: {
@@ -22,8 +21,8 @@ class CertifiedUserPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            address: null,
-            name: null,
+            address: "",
+            name: "",
             pubKey: null,
             description: "",
             iconContent: null,
@@ -41,7 +40,6 @@ class CertifiedUserPage extends Component {
 
         // get user profile from eth
         var profile = await contract.methods.getUser(address).call();
-        console.log("componentDidMount:", profile);
 
         this.setState({
             address: address,
@@ -66,9 +64,9 @@ class CertifiedUserPage extends Component {
         const { contract } = this.props;
         const { address, name, pubKey, description, iconContent, isCertified } = this.state;
 
-        console.log("update info:", this.state);
-
-        await contract.methods.setUser(address, name, pubKey, description, iconContent, isCertified);
+        await contract.methods
+            .setUser(address, name, pubKey, description, iconContent, isCertified)
+            .send({ from: address });
     };
 
     render() {
@@ -91,7 +89,7 @@ class CertifiedUserPage extends Component {
                         />
                         <TextField
                             margin="dense"
-                            // label="Address"
+                            label="Address"
                             variant="outlined"
                             InputProps={{ readOnly: true }}
                             fullWidth
