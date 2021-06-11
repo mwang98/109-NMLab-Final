@@ -51,7 +51,6 @@ class MailBoxPage extends Component {
         const address = accounts[0];
         var profile = await contract.methods.getUser(address).call();
 
-
         this.setState({
             userAddr: address,
             userName: profile[0],
@@ -62,9 +61,6 @@ class MailBoxPage extends Component {
     };
 
     updateMyMailBox = async () => {
-        this.setState({
-            mailMap: new Map(MockMailList.map((mail) => [mail.id, mail])),
-        });
         const { userAddr } = this.state;
         const { contract, type } = this.props;
 
@@ -81,27 +77,23 @@ class MailBoxPage extends Component {
             case PAGE_TYPE.DRAFT:
                 mailBox = await contract.methods.getDraftboxMails(userAddr).call();
         }
-        mailBox.map((mail) => newMailMap.set(mail.uuid, mail));
+        await Promise.all(
+            mailBox.map(async (mail) => {
+                const receiverName = (await contract.methods.getUser(mail.receiverAddr).call())[0];
+                const senderName = (await contract.methods.getUser(mail.senderAddr).call())[0];
+                newMailMap.set(mail.uuid, { ...mail, receiverName, senderName });
+            })
+        );
         await this.setState({
             mailMap: newMailMap,
         });
+        console.log("set state", this.state);
     };
 
     uploadFile = async (buffer) => {
         var result = await ipfs.add(buffer);
         return result.value.path;
     };
-
-    packMailToUpload = (mail) => [
-        mail.id,
-        mail.senderAddr,
-        mail.receiverAddr,
-        mail.subject,
-        mail.timestamp,
-        mail.contents,
-        mail.multiMediaContents,
-        mail.isOpen,
-    ];
 
     onSelectMail = (event, mid) => {
         this.setState({ selectedMid: mid });
@@ -193,7 +185,6 @@ class MailBoxPage extends Component {
             );
 
             // eth network
-            var mailUpload = this.packMailToUpload(mail);
             await contract.methods
                 .saveMail(userAddr, [
                     mail.uuid,
