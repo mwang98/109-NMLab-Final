@@ -156,6 +156,8 @@ class MailEditor extends Component {
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
 
+        var time = new Date(timestamp);
+
         return (
             <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12}>
@@ -170,25 +172,13 @@ class MailEditor extends Component {
                 <Grid item xs={2}>
                     <Avatar alt={isInbox ? senderName : receiverName} className={classes.large} src="../logo.png" />
                 </Grid>
-                <Grid item xs={10} container spacing={1}>
+                <Grid item xs={10} container spacing={2}>
                     <Grid item xs={9}>
                         <TextField
-                            label={isInbox ? "Sender" : "Receiver"}
-                            value={isInbox ? senderName : receiverName}
+                            label="Timestamp"
+                            value={time.toString()}
                             InputProps={{ readOnly: true }}
                             fullWidth
-                        />
-                    </Grid>
-                    <Grid item xs={2}>
-                        <TextField label="Timestamp" value={timestamp} InputProps={{ readOnly: true }} fullWidth />
-                    </Grid>
-                    <Grid item xs={9}>
-                        <TextField
-                            label="Address"
-                            value={isInbox ? senderAddr : receiverAddr}
-                            InputProps={{ readOnly: readOnly }}
-                            fullWidth
-                            onChange={this.onChangeReceiverAddr}
                         />
                     </Grid>
                     <Grid item xs={2}>
@@ -198,6 +188,24 @@ class MailEditor extends Component {
                         >
                             {isOpen ? "read" : "unread"}
                         </Button>
+                    </Grid>
+                    <Grid item xs={9}>
+                        <TextField
+                            label={isInbox ? "Sender" : "Receiver"}
+                            value={isInbox ? senderName : receiverName}
+                            InputProps={{ readOnly: true }}
+                            fullWidth
+                        />
+                    </Grid>
+
+                    <Grid item xs={9}>
+                        <TextField
+                            label="Address"
+                            value={isInbox ? senderAddr : receiverAddr}
+                            InputProps={{ readOnly: readOnly }}
+                            fullWidth
+                            onChange={this.onChangeReceiverAddr}
+                        />
                     </Grid>
                 </Grid>
                 <Grid item xs={12}>
