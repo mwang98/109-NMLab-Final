@@ -34,6 +34,9 @@ class MailBoxPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userName: "",
+            userAddr: "",
+            userPubKey: "",
             selectedMid: null,
             mailMap: new Map(),
         };
@@ -41,7 +44,21 @@ class MailBoxPage extends Component {
 
     componentDidMount = async () => {
         console.log("componentDidMount");
-        this.updateMyMailBox();
+
+        const { accounts, contract } = this.props;
+        if (!accounts || !contract) return;
+
+        const address = accounts[0];
+
+        var profile = await contract.methods.getUser(address).call();
+
+        this.setState({
+            userAddr: address,
+            userName: profile[0],
+            userPubKey: profile[1],
+        });
+
+        await this.updateMyMailBox();
     };
 
     updateMyMailBox = async () => {
@@ -91,7 +108,9 @@ class MailBoxPage extends Component {
             mail.subject,
             mail.timestamp,
             mail.contents,
-            mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash]}),
+            mail.multiMediaContents.map((_var) => {
+                return [_var.fileName, _var.fileType, _var.IPFSHash];
+            }),
             mail.isOpen,
         ];
         console.log(mail_sol);
@@ -103,7 +122,6 @@ class MailBoxPage extends Component {
 
             const state = "Code form solidty";
             // open mail
-            
         }
     };
     onDeleteMail = (event, mid) => {
@@ -161,20 +179,21 @@ class MailBoxPage extends Component {
     onUploadFile = (event) => {};
 
     onCreateMail = (event) => {
+        const { userName, userAddr } = this.state;
         const { accounts } = this.props;
         if (!accounts) return;
 
         // create new mail
-        console.log("create new mail");
-        const mid = uuidv4();
+        var mid = uuidv4();
+
         const newMail = {
             id: mid,
-            subject: "New Mail",
-            senderAddr: accounts[0],
-            senderName: "NOT_IMPLEMENTED", // getUserProfile -> name
+            subject: "<subject>",
+            senderAddr: userAddr,
+            senderName: userName,
             receiverAddr: "",
             receiverName: "",
-            timestamp: "",
+            timestamp: Date.now(),
             contents: "",
             multiMediaContents: [],
             isOpen: false,
