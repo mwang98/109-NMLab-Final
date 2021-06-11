@@ -133,7 +133,7 @@ contract EmailSystem {
                 i < generalUsers[mail.senderAddr].draftbox.mailIds.length;
                 ++i
             ) {
-                if (generalUsers[mail.senderAddr].inbox.mailIds[i] == id) {
+                if (generalUsers[mail.senderAddr].draftbox.mailIds[i] == id) {
                     found = true;
                     break;
                 }

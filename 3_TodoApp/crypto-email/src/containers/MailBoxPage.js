@@ -78,7 +78,7 @@ class MailBoxPage extends Component {
                 break;
             case PAGE_TYPE.DRAFT:
                 mailBox = await contract.methods.getDraftboxMails(userAddr).call();
-                break;
+                console.log(mailBox[0])
         }
         await Promise.all(
             mailBox.map(async (mail) => {
@@ -105,8 +105,7 @@ class MailBoxPage extends Component {
     onSendMail = async (event, mail) => {
         const { contract } = this.props;
 
-        console.log(mail);
-
+        console.log(mail.multiMediaContents);
         await contract.methods
             .sendMail([
                 mail.uuid,
@@ -115,7 +114,7 @@ class MailBoxPage extends Component {
                 mail.subject,
                 mail.timestamp,
                 mail.contents,
-                mail.multiMediaContents,
+                mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
@@ -181,6 +180,7 @@ class MailBoxPage extends Component {
             );
 
             // eth network
+            console.log(mail.uuid);
             await contract.methods
                 .saveMail(userAddr, [
                     mail.uuid,
@@ -189,7 +189,7 @@ class MailBoxPage extends Component {
                     mail.subject,
                     mail.timestamp,
                     mail.contents,
-                    mail.multiMediaContents,
+                    mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
                     mail.isOpen,
                 ])
                 .send({ from: userAddr });

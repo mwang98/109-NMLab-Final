@@ -1,8 +1,8 @@
 const mockMailList = [
     {
         id: "59ae79568a816",
-        senderAddr: "0xbaDD484b45d3B9f3898D7514D4b98336c4c27DD7",
-        receiverAddr: "0x645Cd1b16F8A5B81FC5a7dB93B1157de647e5b4B",
+        senderAddr: "0x57735ad5675bC8E3c9577699d4116ee9a85Cd465",
+        receiverAddr: "0x5Bf4F75757b8Eb63AFd52973bAdB4c5D84bb6B98",
         senderName: "foo",
         receiverName: "foo",
         subject: "Empty",
