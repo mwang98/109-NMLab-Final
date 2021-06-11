@@ -47,7 +47,7 @@ class MailEditor extends Component {
 
     static getDerivedStateFromProps(props, state) {
         if (!props.mail || !state.mail) return null;
-        if (state.mail.id !== props.mail.id) {
+        if (state.mail.uuid !== props.mail.uuid) {
             return { mail: props.mail, fileList: new Map(), mailIsSaved: true };
         }
         return null;

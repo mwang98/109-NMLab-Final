@@ -28,8 +28,8 @@ class MailCard extends Component {
             <ListItem
                 button
                 alignItems="flex-start"
-                selected={selectedMid === mail.id}
-                onClick={(event) => onSelectMail(event, mail.id)}
+                selected={selectedMid === mail.uuid}
+                onClick={(event) => onSelectMail(event, mail.uuid)}
                 className={pageType === PAGE_TYPE.DRAFT || mail.isOpen ? {} : classes.cardUnread}
             >
                 <ListItemAvatar>
@@ -46,7 +46,7 @@ class MailCard extends Component {
                     }
                 />
                 <ListItemSecondaryAction>
-                    <IconButton onClick={(event) => onDeleteMail(event, mail.id)}>
+                    <IconButton onClick={(event) => onDeleteMail(event, mail.uuid)}>
                         <DeleteIcon />
                     </IconButton>
                 </ListItemSecondaryAction>
