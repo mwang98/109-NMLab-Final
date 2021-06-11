@@ -21,13 +21,14 @@
   ```javascript
   {
     name: str,
-    addr: str,
+    pubKey: str,
     description: str,
     icon: MultiMediaContents,
     inbox: List[Mail],
     outbox: List[Mail],
     draftbox: List[Mail],
     isCertified: bool,
+    isAdmin: bool,
     applications: List[Application]
   }
   ```
@@ -69,16 +70,16 @@
 
 ## 進度規劃
 - User Profile
-  - [ ] Mock User Data: x3
-  - [ ] User Profile / Welcome Pages  
+  - [x] Mock User Data: x3
+  - [x] User Profile / Welcome Pages  
     - 前端：
-      - [ ]  呈現 name, address, description, icons
-      - [ ]  保存更改設定
+      - [x]  呈現 name, address, description, icons
+      - [x]  保存更改設定
     - 後端：
-      - [ ] Get user data
-      - [ ] Set user datas
+      - [x] Get user data: 回傳非 List 的資料
+      - [x] Set user datas: 丟非 List 的資料
 - 寄信
-  - [ ] New mail 的 route 跳轉設定
+  - [x] New mail 的 route 跳轉設定
   - [ ] Reply 的 route 跳轉設定
   - [ ] Component - Eth 串連
     - [ ] 自動帶入 senderName、 senderAddr

@@ -22,28 +22,34 @@ class CertifiedUserPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: null,
             address: null,
+            name: null,
+            pubKey: null,
             description: "",
+            iconContent: null,
             isCertified: false,
         };
     }
 
     componentDidMount = async () => {
-        const { accounts } = this.props;
+        const { accounts, contract } = this.props;
 
-        if (!accounts) return;
+        if (!accounts && !contract) return;
         const address = accounts[0];
 
-        // get user profile from eth
+        console.log(accounts, contract);
 
-        // mock data
-        const user = mockUsers[0];
+        // get user profile from eth
+        var profile = await contract.methods.getUser(address).call();
+        console.log("componentDidMount:", profile);
+
         this.setState({
-            name: user.name,
             address: address,
-            description: user.description,
-            isCertified: user.isCertified,
+            name: profile[0],
+            pubKey: profile[1],
+            description: profile[2],
+            iconContent: profile[3],
+            isCertified: profile[4],
         });
     };
 
@@ -55,14 +61,21 @@ class CertifiedUserPage extends Component {
         this.setState({ description: event.target.value });
     };
 
-    onSubmit = (event) => {
+    onSubmit = async (event) => {
         // set user profile to eth
+        const { contract } = this.props;
+        const { address, name, pubKey, description, iconContent, isCertified } = this.state;
+
+        console.log("update info:", this.state);
+
+        await contract.methods.setUser(address, name, pubKey, description, iconContent, isCertified);
     };
 
     render() {
         const { classes } = this.props;
         const { name, address, description } = this.state;
 
+        console.log(this.state);
         return (
             <div>
                 <Grid container className={classes.container}>
@@ -72,19 +85,18 @@ class CertifiedUserPage extends Component {
                             margin="dense"
                             label="Name"
                             variant="outlined"
-                            autoFocus
                             fullWidth
                             value={name}
                             onChange={this.onChangeName}
                         />
                         <TextField
                             margin="dense"
-                            label="Address"
+                            // label="Address"
                             variant="outlined"
                             InputProps={{ readOnly: true }}
-                            autoFocus
                             fullWidth
                             value={address}
+                            onChange={this.onChangeName}
                         />
                         <TextField
                             margin="dense"
@@ -92,7 +104,6 @@ class CertifiedUserPage extends Component {
                             rowsMax={20}
                             rows={10}
                             variant="outlined"
-                            autoFocus
                             fullWidth
                             multiline
                             value={description}
