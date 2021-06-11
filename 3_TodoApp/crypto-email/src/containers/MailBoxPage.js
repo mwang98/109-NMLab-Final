@@ -72,10 +72,13 @@ class MailBoxPage extends Component {
         switch (type) {
             case PAGE_TYPE.INBOX:
                 mailBox = await contract.methods.getInboxMails(userAddr).call();
+                break;
             case PAGE_TYPE.OUTBOX:
                 mailBox = await contract.methods.getOutboxMails(userAddr).call();
+                break;
             case PAGE_TYPE.DRAFT:
                 mailBox = await contract.methods.getDraftboxMails(userAddr).call();
+                break;
         }
         await Promise.all(
             mailBox.map(async (mail) => {
@@ -87,7 +90,6 @@ class MailBoxPage extends Component {
         await this.setState({
             mailMap: newMailMap,
         });
-        console.log("set state", this.state);
     };
 
     uploadFile = async (buffer) => {
@@ -133,6 +135,7 @@ class MailBoxPage extends Component {
             // open mail
         }
     };
+
     onDeleteMail = (event, mid) => {
         const state = "Code form solidty";
         // delete from database
@@ -143,6 +146,7 @@ class MailBoxPage extends Component {
             return state;
         });
     };
+
     onSaveMail = async (event, mail) => {
         event.preventDefault();
 
@@ -209,8 +213,6 @@ class MailBoxPage extends Component {
 
     onCreateMail = (event) => {
         const { userName, userAddr } = this.state;
-        const { accounts } = this.props;
-        if (!accounts) return;
 
         // create new mail
         const mid = uuidv4();
