@@ -226,7 +226,9 @@ class MailEditor extends Component {
                     <>
                         <Grid container xs={12}>
                             {[...this.state.fileList.values()].map((file) => (
-                                <AttachFile filename={file.fileName} />
+                                <div>
+                                    <AttachFile filename={file.fileName} file={file}/>
+                                </div>
                             ))}
                         </Grid>
                         <Grid container xs={5} className={classes.upload}>
