@@ -13,6 +13,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
+import { formatTimestamp } from "../utils/utils";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
 
@@ -156,8 +157,6 @@ class MailEditor extends Component {
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
 
-        var time = new Date(timestamp);
-
         return (
             <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12}>
@@ -176,7 +175,7 @@ class MailEditor extends Component {
                     <Grid item xs={9}>
                         <TextField
                             label="Timestamp"
-                            value={time.toString()}
+                            value={formatTimestamp(timestamp)}
                             InputProps={{ readOnly: true }}
                             fullWidth
                         />
