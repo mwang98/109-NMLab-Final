@@ -49,7 +49,7 @@ class MailBox extends Component {
         const numUnread = mailList.filter((mail) => !mail.isOpen).length;
 
         return (
-            <div>
+            <React.Fragment>
                 <SearchBar
                     title={`${pageType} Mail Box`}
                     badgeContent={numUnread}
@@ -80,7 +80,7 @@ class MailBox extends Component {
                     rowsPerPage={rowsPerPage}
                     onChangeRowsPerPage={this.onChangeRowsPerPage}
                 />
-            </div>
+            </React.Fragment>
         );
     }
 }

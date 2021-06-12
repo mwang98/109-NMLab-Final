@@ -52,7 +52,7 @@ class App extends Component {
 
         return (
             <div className="App">
-                <NavigationBar>
+                <NavigationBar accounts={accounts}>
                     <Button variant="outlined" className={classes.routeBtn}>
                         <NavLink to="/inbox" className={classes.link}>
                             Inbox

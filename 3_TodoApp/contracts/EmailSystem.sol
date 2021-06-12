@@ -414,8 +414,7 @@ contract EmailSystem {
         return (u.name, u.pubKey, u.description, u.icon, u.isCertified);
     }
 
-    function openMail(Mail memory mail) public {
-        string memory uuid = mail.uuid;
+    function openMail(string memory uuid) public {
         mails[uuid].isOpen = true;
         emit OnOpenMail(msg.sender, uuid);
     }

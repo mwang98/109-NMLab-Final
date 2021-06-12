@@ -10,9 +10,6 @@ import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
 
-// mock data
-import MockMailList from "../mock/mail.js";
-
 import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
 
 const { create } = require("ipfs-http-client");
@@ -43,16 +40,13 @@ class MailBoxPage extends Component {
     }
 
     componentDidMount = async () => {
-        console.log("componentDidMount");
-
         const { accounts, contract } = this.props;
         if (!accounts || !contract) return;
 
-        const address = accounts[0];
-        var profile = await contract.methods.getUser(address).call();
+        var profile = await contract.methods.getUser(accounts[0]).call();
 
         this.setState({
-            userAddr: address,
+            userAddr: accounts[0],
             userName: profile[0],
             userPubKey: profile[1],
         });
@@ -64,9 +58,6 @@ class MailBoxPage extends Component {
         const { userAddr } = this.state;
         const { contract, type } = this.props;
 
-        if (!contract) return;
-
-        // retrieve data from eth networks
         var mailBox = [];
         var newMailMap = new Map();
         switch (type) {
@@ -78,7 +69,6 @@ class MailBoxPage extends Component {
                 break;
             case PAGE_TYPE.DRAFT:
                 mailBox = await contract.methods.getDraftboxMails(userAddr).call();
-                console.log(mailBox[0])
         }
         await Promise.all(
             mailBox.map(async (mail) => {
@@ -98,14 +88,22 @@ class MailBoxPage extends Component {
         return result.value.path;
     };
 
-    onSelectMail = (event, mid) => {
+    onSelectMail = async (event, mid) => {
+        const { userAddr, mailMap } = this.state;
+        const { contract, type } = this.props;
+        const mail = mailMap.get(mid);
+
+        if (type === PAGE_TYPE.INBOX && !mail.isOpen) {
+            await contract.methods.openMail(mid).send({ from: userAddr });
+            mail.isOpen = true;
+        }
+
         this.setState({ selectedMid: mid });
     };
 
     onSendMail = async (event, mail) => {
         const { contract } = this.props;
 
-        console.log(mail.multiMediaContents);
         await contract.methods
             .sendMail([
                 mail.uuid,
@@ -114,26 +112,32 @@ class MailBoxPage extends Component {
                 mail.subject,
                 mail.timestamp,
                 mail.contents,
-                mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
+                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
-
-        if (this.props.type === PAGE_TYPE.INBOX) {
-            mail.isOpen = true;
-
-            const state = "Code form solidty";
-            // open mail
-        }
     };
 
-    onDeleteMail = (event, mid) => {
-        const state = "Code form solidty";
-        // delete from database
+    onDeleteMail = async (event, mail) => {
+        const { userAddr } = this.state;
+        const { contract } = this.props;
+
+        await contract.methods
+            .deleteMail(userAddr, [
+                mail.uuid,
+                mail.senderAddr,
+                mail.receiverAddr,
+                mail.subject,
+                mail.timestamp,
+                mail.contents,
+                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                mail.isOpen,
+            ])
+            .send({ from: userAddr });
 
         // client
         this.setState((state) => {
-            state.mailMap.delete(mid);
+            state.mailMap.delete(mail.uuid);
             return state;
         });
     };
@@ -143,7 +147,6 @@ class MailBoxPage extends Component {
 
         const { userAddr } = this.state;
         const { contract } = this.props;
-        if (!contract) return;
 
         // receiver exsit
         try {
@@ -189,7 +192,7 @@ class MailBoxPage extends Component {
                     mail.subject,
                     mail.timestamp,
                     mail.contents,
-                    mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
+                    mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
                     mail.isOpen,
                 ])
                 .send({ from: userAddr });
@@ -258,7 +261,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3}>
                             <MailBox
-                                mailList={[...mailMap.values()]}
+                                mailList={[...Array.from(mailMap.values()).reverse()]}
                                 pageType={type}
                                 selectedMid={selectedMid}
                                 onSelectMail={this.onSelectMail}

@@ -25,7 +25,7 @@ const styles = (theme) => ({
             margin: theme.spacing(2),
         },
     },
-    newMailBtn: {
+    addrBtn: {
         margin: theme.spacing(2),
         color: "white",
         borderColor: "white",
@@ -42,18 +42,20 @@ class NavigationBar extends Component {
     }
 
     render() {
-        const { children, classes } = this.props;
+        const { children, classes, accounts } = this.props;
         return (
             <div className={classes.grow}>
                 <AppBar position="static">
                     <Toolbar>
                         <Avatar alt="logo" src="/logo.png" />
                         <Typography className={classes.title} variant="h5" noWrap>
-                            {" "}
-                            Crypto Mail{" "}
+                            {"Crypto Mail"}
                         </Typography>
                         <div className={classes.routeBtn}>{children}</div>
                         <div className={classes.grow} />
+                        <Button className={classes.addrBtn} variant="outlined">
+                            {accounts ? accounts[0] : ""}
+                        </Button>
                         <NavLink to="/profile" className={classes.link}>
                             <IconButton>
                                 <AccountCircle />

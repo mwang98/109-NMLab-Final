@@ -10,10 +10,14 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { PAGE_TYPE } from "../constants/Page";
+import { formatTimestamp } from "../utils/utils";
 
 const styles = (theme) => ({
     cardUnread: {
         backgroundColor: "#FAE8E0",
+    },
+    bold: {
+        fontWeight: 600,
     },
 });
 
@@ -38,15 +42,14 @@ class MailCard extends Component {
                 <ListItemText
                     primary={mail.subject}
                     secondary={
-                        <React.Fragment>
-                            <Typography component="span" color="textPrimary">
-                                {mail.senderName}
-                            </Typography>
-                        </React.Fragment>
+                        <Typography component="span" color="textPrimary" className={classes.bold}>
+                            {`${pageType === PAGE_TYPE.DRAFT ? "receiver: " : ""} ${mail.senderName}`}
+                        </Typography>
                     }
                 />
+                <ListItemText primary={formatTimestamp(mail.timestamp)} />
                 <ListItemSecondaryAction>
-                    <IconButton onClick={(event) => onDeleteMail(event, mail.uuid)}>
+                    <IconButton onClick={(event) => onDeleteMail(event, mail)}>
                         <DeleteIcon />
                     </IconButton>
                 </ListItemSecondaryAction>
