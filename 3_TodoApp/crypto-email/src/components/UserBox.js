@@ -42,8 +42,8 @@ class UserBox extends Component {
         const { userList } = this.props;
         const { searchKey, page, rowsPerPage } = this.state;
         return (
-            <>
-                <SearchBar title={"Certified User"} badgeContent={0} onSearchChange={this.onSearchChange} />
+            <React.Fragment>
+                <SearchBar title="Certified User" badgeContent={0} onSearchChange={this.onSearchChange} />
                 <TableContainer component={Paper}>
                     <Table aria-label="collapsible table">
                         <TableHead>
@@ -72,7 +72,7 @@ class UserBox extends Component {
                         onChangeRowsPerPage={this.onChangeRowsPerPage}
                     />
                 </TableContainer>
-            </>
+            </React.Fragment>
         );
     }
 }
