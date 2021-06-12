@@ -88,6 +88,8 @@ class MailBoxPage extends Component {
     downloadFile = async (IPFSHash) => {
         const { ipfsNode } = this.props;
 
+        console.log("IPFS", IPFSHash);
+
         let content = [];
         for await (const chunk of ipfsNode.cat(IPFSHash)) {
             content.push(chunk);
@@ -112,13 +114,16 @@ class MailBoxPage extends Component {
             mail.isOpen = true;
         }
 
-        mail.multiMediaContents = this.mediaContentsSol2JS(mail.multiMediaContents);
+        if (mail.multiMediaContents.length && mail.multiMediaContents[0] instanceof Array) {
+            console.log(mail.multiMediaContents);
+            mail.multiMediaContents = this.mediaContentsSol2JS(mail.multiMediaContents);
 
-        await Promise.all(
-            mail.multiMediaContents.map(async (content) => {
-                content.buffer = await this.downloadFile(content.IPFSHash);
-            })
-        );
+            await Promise.all(
+                mail.multiMediaContents.map(async (content) => {
+                    content.buffer = await this.downloadFile(content.IPFSHash);
+                })
+            );
+        }
 
         this.setState({ selectedMid: mid });
     };
