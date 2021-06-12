@@ -14,7 +14,7 @@ import { formatTimestamp } from "../utils/utils";
 
 const styles = (theme) => ({
     cardUnread: {
-        backgroundColor: "#FAE8E0",
+        backgroundColor: "#EAF6E9",
     },
     bold: {
         fontWeight: 600,
