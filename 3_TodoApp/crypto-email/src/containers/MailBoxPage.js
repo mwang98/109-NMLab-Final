@@ -10,9 +10,6 @@ import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
 
-// mock data
-import MockMailList from "../mock/mail.js";
-
 import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
 
 const { create } = require("ipfs-http-client");
@@ -43,16 +40,13 @@ class MailBoxPage extends Component {
     }
 
     componentDidMount = async () => {
-        console.log("componentDidMount");
-
         const { accounts, contract } = this.props;
         if (!accounts || !contract) return;
 
-        const address = accounts[0];
-        var profile = await contract.methods.getUser(address).call();
+        var profile = await contract.methods.getUser(accounts[0]).call();
 
         this.setState({
-            userAddr: address,
+            userAddr: accounts[0],
             userName: profile[0],
             userPubKey: profile[1],
         });
@@ -64,9 +58,6 @@ class MailBoxPage extends Component {
         const { userAddr } = this.state;
         const { contract, type } = this.props;
 
-        if (!contract) return;
-
-        // retrieve data from eth networks
         var mailBox = [];
         var newMailMap = new Map();
         switch (type) {
@@ -113,7 +104,6 @@ class MailBoxPage extends Component {
     onSendMail = async (event, mail) => {
         const { contract } = this.props;
 
-        console.log(mail.multiMediaContents);
         await contract.methods
             .sendMail([
                 mail.uuid,
@@ -126,21 +116,11 @@ class MailBoxPage extends Component {
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
-
-        if (this.props.type === PAGE_TYPE.INBOX) {
-            mail.isOpen = true;
-
-            const state = "Code form solidty";
-            // open mail
-        }
     };
 
     onDeleteMail = async (event, mail) => {
         const { userAddr } = this.state;
         const { contract } = this.props;
-        const { uuid } = mail;
-
-        if (!contract) return;
 
         await contract.methods
             .deleteMail(userAddr, [
@@ -157,7 +137,7 @@ class MailBoxPage extends Component {
 
         // client
         this.setState((state) => {
-            state.mailMap.delete(uuid);
+            state.mailMap.delete(mail.uuid);
             return state;
         });
     };
@@ -167,7 +147,6 @@ class MailBoxPage extends Component {
 
         const { userAddr } = this.state;
         const { contract } = this.props;
-        if (!contract) return;
 
         // receiver exsit
         try {
