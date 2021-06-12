@@ -261,7 +261,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3}>
                             <MailBox
-                                mailList={[...mailMap.values()]}
+                                mailList={[...Array.from(mailMap.values()).reverse()]}
                                 pageType={type}
                                 selectedMid={selectedMid}
                                 onSelectMail={this.onSelectMail}
