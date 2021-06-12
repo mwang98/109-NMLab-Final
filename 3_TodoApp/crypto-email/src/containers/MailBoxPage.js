@@ -10,10 +10,6 @@ import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
 
-import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
-
-const { create } = require("ipfs-http-client");
-
 const styles = (theme) => ({
     root: {
         justifyContent: "center",
