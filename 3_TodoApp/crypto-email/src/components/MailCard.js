@@ -46,7 +46,7 @@ class MailCard extends Component {
                     }
                 />
                 <ListItemSecondaryAction>
-                    <IconButton onClick={(event) => onDeleteMail(event, mail.uuid)}>
+                    <IconButton onClick={(event) => onDeleteMail(event, mail)}>
                         <DeleteIcon />
                     </IconButton>
                 </ListItemSecondaryAction>

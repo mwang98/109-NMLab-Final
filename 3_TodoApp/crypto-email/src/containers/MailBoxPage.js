@@ -78,7 +78,6 @@ class MailBoxPage extends Component {
                 break;
             case PAGE_TYPE.DRAFT:
                 mailBox = await contract.methods.getDraftboxMails(userAddr).call();
-                console.log(mailBox[0])
         }
         await Promise.all(
             mailBox.map(async (mail) => {
@@ -114,7 +113,7 @@ class MailBoxPage extends Component {
                 mail.subject,
                 mail.timestamp,
                 mail.contents,
-                mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
+                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
@@ -127,13 +126,29 @@ class MailBoxPage extends Component {
         }
     };
 
-    onDeleteMail = (event, mid) => {
-        const state = "Code form solidty";
-        // delete from database
+    onDeleteMail = async (event, mail) => {
+        const { userAddr } = this.state;
+        const { contract } = this.props;
+        const { uuid } = mail;
+
+        if (!contract) return;
+
+        await contract.methods
+            .deleteMail(userAddr, [
+                mail.uuid,
+                mail.senderAddr,
+                mail.receiverAddr,
+                mail.subject,
+                mail.timestamp,
+                mail.contents,
+                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                mail.isOpen,
+            ])
+            .send({ from: userAddr });
 
         // client
         this.setState((state) => {
-            state.mailMap.delete(mid);
+            state.mailMap.delete(uuid);
             return state;
         });
     };
@@ -189,7 +204,7 @@ class MailBoxPage extends Component {
                     mail.subject,
                     mail.timestamp,
                     mail.contents,
-                    mail.multiMediaContents.map(_var=>{return [_var.fileName, _var.fileType, _var.IPFSHash];}),
+                    mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
                     mail.isOpen,
                 ])
                 .send({ from: userAddr });
