@@ -11,6 +11,7 @@ import ProfilePage from "./containers/ProfilePage";
 import MailBoxPage from "./containers/MailBoxPage";
 import CertifiedUserPage from "./containers/CertifiedUserPage";
 
+import { getIPFSserver } from "./utils/ipfsServer";
 import EmailSystemContract from "./build/contracts/EmailSystem.json";
 
 const styles = (theme) => ({
@@ -26,7 +27,7 @@ const styles = (theme) => ({
 class App extends Component {
     constructor(props) {
         super(props);
-        this.state = { web3: null, accounts: null, contract: null };
+        this.state = { web3: null, accounts: null, contract: null, ipfsNode: null };
     }
 
     componentDidMount = async () => {
@@ -39,7 +40,8 @@ class App extends Component {
             console.log("network", networkId, deployedNetwork);
             console.log("accounts", accounts);
             const instance = new web3.eth.Contract(EmailSystemContract.abi, deployedNetwork && deployedNetwork.address);
-            this.setState({ web3, accounts, contract: instance });
+            const ipfsNode = await getIPFSserver();
+            this.setState({ web3, accounts, contract: instance, ipfsNode });
         } catch (error) {
             alert(`Failed to load web3, accounts, or contract. Check console for details.`);
             console.error(error);
@@ -48,7 +50,7 @@ class App extends Component {
     };
     render() {
         const { classes } = this.props;
-        const { web3, accounts, contract } = this.state;
+        const { web3, accounts, contract, ipfsNode } = this.state;
 
         return (
             <div className="App">
@@ -95,7 +97,13 @@ class App extends Component {
                     <Route
                         path="/draft"
                         component={() => (
-                            <MailBoxPage type={PAGE_TYPE.DRAFT} web3={web3} accounts={accounts} contract={contract} />
+                            <MailBoxPage
+                                type={PAGE_TYPE.DRAFT}
+                                web3={web3}
+                                accounts={accounts}
+                                contract={contract}
+                                ipfsNode={ipfsNode}
+                            />
                         )}
                     />
                     <Route

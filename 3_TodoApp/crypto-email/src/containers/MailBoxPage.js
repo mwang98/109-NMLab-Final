@@ -13,7 +13,6 @@ import { PAGE_TYPE } from "../constants/Page";
 import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
 
 const { create } = require("ipfs-http-client");
-const ipfs = create({ host: ADDRESS, port: PORT, protocol: PROTOCOL });
 
 const styles = (theme) => ({
     root: {
@@ -84,8 +83,9 @@ class MailBoxPage extends Component {
     };
 
     uploadFile = async (buffer) => {
-        var result = await ipfs.add(buffer);
-        return result.value.path;
+        const { ipfsNode } = this.props;
+        var result = await ipfsNode.add(buffer);
+        return result.path;
     };
 
     onSelectMail = async (event, mid) => {
@@ -160,25 +160,13 @@ class MailBoxPage extends Component {
             return;
         }
 
-        // ipfs
-        console.log(ipfs.getEndpointConfig());
-        console.log(ipfs);
-
         try {
             const { id, multiMediaContents } = mail;
 
-            console.log(multiMediaContents);
-
-            await Promise.all(
+            var multiMediaContentsSol = await Promise.all(
                 multiMediaContents.map(async (content) => {
-                    // const IPFSHash = await this.uploadFile(content.buffer);
-                    const IPFSHash = "ipfs-hash-not-available";
-
-                    const state = "Code form solidty";
-
-                    content.IPFSHash = IPFSHash;
-
-                    return content;
+                    content.IPFSHash = await this.uploadFile(content.buffer);
+                    return [content.fileName, content.fileType, content.IPFSHash];
                 })
             );
 
@@ -192,7 +180,7 @@ class MailBoxPage extends Component {
                     mail.subject,
                     mail.timestamp,
                     mail.contents,
-                    mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                    multiMediaContentsSol,
                     mail.isOpen,
                 ])
                 .send({ from: userAddr });
@@ -203,8 +191,6 @@ class MailBoxPage extends Component {
             console.log(err);
         }
     };
-
-    onUploadFile = (event) => {};
 
     onCreateMail = (event) => {
         const { userName, userAddr } = this.state;
