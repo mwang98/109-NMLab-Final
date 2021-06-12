@@ -85,13 +85,25 @@ class App extends Component {
                     <Route
                         path="/inbox"
                         component={() => (
-                            <MailBoxPage type={PAGE_TYPE.INBOX} web3={web3} accounts={accounts} contract={contract} />
+                            <MailBoxPage
+                                type={PAGE_TYPE.INBOX}
+                                web3={web3}
+                                accounts={accounts}
+                                contract={contract}
+                                ipfsNode={ipfsNode}
+                            />
                         )}
                     />
                     <Route
                         path="/outbox"
                         component={() => (
-                            <MailBoxPage type={PAGE_TYPE.OUTBOX} web3={web3} accounts={accounts} contract={contract} />
+                            <MailBoxPage
+                                type={PAGE_TYPE.OUTBOX}
+                                web3={web3}
+                                accounts={accounts}
+                                contract={contract}
+                                ipfsNode={ipfsNode}
+                            />
                         )}
                     />
                     <Route
