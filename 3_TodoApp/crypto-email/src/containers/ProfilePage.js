@@ -75,7 +75,7 @@ class CertifiedUserPage extends Component {
 
         console.log(this.state);
         return (
-            <div>
+            <React.Fragment>
                 <Grid container className={classes.container}>
                     <Grid container xs={4} className={classes.container}>
                         <Avatar alt={name} src="/static/images/avatar/1.jpg" className={classes.large} />
@@ -112,7 +112,7 @@ class CertifiedUserPage extends Component {
                         </Button>
                     </Grid>
                 </Grid>
-            </div>
+            </React.Fragment>
         );
     }
 }

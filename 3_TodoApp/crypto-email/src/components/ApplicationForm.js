@@ -29,7 +29,7 @@ export default function FormDialog(props) {
     };
 
     return (
-        <div>
+        <React.Fragment>
             <Button variant="outlined" onClick={handleClickOpen}>
                 Apply
             </Button>
@@ -47,6 +47,6 @@ export default function FormDialog(props) {
                     <Button onClick={onSubmit}>Submit</Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </React.Fragment>
     );
 }
