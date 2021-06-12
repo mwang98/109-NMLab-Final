@@ -97,7 +97,16 @@ class MailBoxPage extends Component {
         return result.value.path;
     };
 
-    onSelectMail = (event, mid) => {
+    onSelectMail = async (event, mid) => {
+        const { userAddr, mailMap } = this.state;
+        const { contract, type } = this.props;
+        const mail = mailMap.get(mid);
+
+        if (type === PAGE_TYPE.INBOX && !mail.isOpen) {
+            await contract.methods.openMail(mid).send({ from: userAddr });
+            mail.isOpen = true;
+        }
+
         this.setState({ selectedMid: mid });
     };
 
