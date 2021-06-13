@@ -14,4 +14,12 @@ const extractUserInfo = (profile) => ({
     isAdmin: profile[5],
 });
 
-export { formatTimestamp, extractUserInfo };
+const extractApplicaiton = (app) => ({
+    id: parseInt(app.id, 10),
+    address: app.addr,
+    name: app.name,
+    description: app.description,
+    status: app.status,
+});
+
+export { formatTimestamp, extractUserInfo, extractApplicaiton };
