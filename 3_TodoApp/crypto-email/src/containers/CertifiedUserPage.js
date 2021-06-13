@@ -7,10 +7,7 @@ import ApplicationTable from "../components/ApplicationTable";
 import UserBox from "../components/UserBox";
 
 import Status from "../constants/ApplicationStatus.json";
-import { extractUserInfo } from "../utils/utils";
-
-import certifiedUserList from "../mock/user.json";
-import applicationList from "../mock/application";
+import { extractUserInfo, extractApplicaiton } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -29,6 +26,7 @@ class CertifiedUserPage extends Component {
         super(props);
         this.state = {
             address: "",
+            name: "",
             isAdmin: false,
             applicationList: [],
             certifiedUserList: [],
@@ -41,9 +39,9 @@ class CertifiedUserPage extends Component {
 
         const address = accounts[0];
         const userInfo = await contract.methods.getUser(address).call();
-        const { isAdmin } = extractUserInfo(userInfo);
+        const { name, isAdmin } = extractUserInfo(userInfo);
 
-        this.setState({ address, isAdmin });
+        this.setState({ address, name, isAdmin });
 
         await this.retrieveCertifiedUsers();
         await this.retrieveApplications();
@@ -68,11 +66,15 @@ class CertifiedUserPage extends Component {
     retrieveApplications = async () => {
         console.log("retrieveApplications");
         const { contract } = this.props;
+        const { address } = this.state;
 
         if (this.state.isAdmin) {
             const application = await contract.methods.getAllApp().call();
             console.log("application", application);
         } else {
+            const result = await contract.methods.getUserApp(address).call();
+            const applicationList = result.map((a) => extractApplicaiton(a));
+            this.setState({ applicationList });
         }
     };
 
@@ -91,19 +93,24 @@ class CertifiedUserPage extends Component {
 
     // user
     onSubmitApplication = async (description) => {
-        const new_application = this.createApplication(description);
+        const { contract } = this.props;
+        const { address } = this.state;
 
-        const msg = "Send to blockchain";
+        const app = this.createApplication(description);
+
+        await contract.methods
+            .submitApp([app.id, app.name, app.address, app.description, app.status])
+            .send({ from: address });
 
         this.setState((state) => ({
-            applicationList: [...state.applicationList, new_application],
+            applicationList: [...state.applicationList, app],
         }));
     };
 
     createApplication = (description) => ({
-        id: "123" + description,
-        address: "myAddr",
-        name: "myName",
+        id: this.state.applicationList.length,
+        address: this.state.address,
+        name: this.state.name,
         description: description,
         status: Status.PENDING,
     });
