@@ -9,11 +9,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-
-import { ADDRESS, PORT, PROTOCOL } from "../constants/IPFS";
-
-const { create } = require("ipfs-http-client");
-const ipfs = create({ host: ADDRESS, port: PORT, protocol: PROTOCOL });
+import uint8ArrayConcat from "uint8arrays/concat";
 
 const styles = (theme) => ({
     root: {
@@ -43,8 +39,8 @@ class MailBoxPage extends Component {
         const { accounts, contract } = this.props;
         if (!accounts || !contract) return;
 
-        var profile = await contract.methods.getUser(accounts[0]).call();
-        console.log(profile)
+        let profile = await contract.methods.getUser(accounts[0]).call();
+
         this.setState({
             userAddr: accounts[0],
             userName: profile[0],
@@ -58,8 +54,8 @@ class MailBoxPage extends Component {
         const { userAddr } = this.state;
         const { contract, type } = this.props;
 
-        var mailBox = [];
-        var newMailMap = new Map();
+        let mailBox = [];
+        let newMailMap = new Map();
         switch (type) {
             case PAGE_TYPE.INBOX:
                 mailBox = await contract.methods.getInboxMails(userAddr).call();
@@ -78,15 +74,35 @@ class MailBoxPage extends Component {
                 newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName });
             })
         );
-        await this.setState({
+        this.setState({
             mailMap: newMailMap,
         });
     };
 
     uploadFile = async (buffer) => {
-        var result = await ipfs.add(buffer);
-        return result.value.path;
+        const { ipfsNode } = this.props;
+        const { path } = await ipfsNode.add(buffer);
+        return path;
     };
+
+    downloadFile = async (IPFSHash) => {
+        const { ipfsNode } = this.props;
+
+        console.log("IPFS", IPFSHash);
+
+        let content = [];
+        for await (const chunk of ipfsNode.cat(IPFSHash)) {
+            content.push(chunk);
+        }
+
+        const contentRaw = uint8ArrayConcat(content);
+        const buffer = await Buffer.from(contentRaw);
+
+        return buffer;
+    };
+
+    mediaContentsJS2Sol = (contents) => contents.map((c) => [c.fileName, c.fileType, c.IPFSHash]);
+    mediaContentsSol2JS = (contents) => contents.map((c) => ({ fileName: c[0], fileType: c[1], IPFSHash: c[2] }));
 
     onSelectMail = async (event, mid) => {
         const { userAddr, mailMap } = this.state;
@@ -96,6 +112,17 @@ class MailBoxPage extends Component {
         if (type === PAGE_TYPE.INBOX && !mail.isOpen) {
             await contract.methods.openMail(mid).send({ from: userAddr });
             mail.isOpen = true;
+        }
+
+        if (mail.multiMediaContents.length && mail.multiMediaContents[0] instanceof Array) {
+            console.log(mail.multiMediaContents);
+            mail.multiMediaContents = this.mediaContentsSol2JS(mail.multiMediaContents);
+
+            await Promise.all(
+                mail.multiMediaContents.map(async (content) => {
+                    content.buffer = await this.downloadFile(content.IPFSHash);
+                })
+            );
         }
 
         this.setState({ selectedMid: mid });
@@ -112,7 +139,7 @@ class MailBoxPage extends Component {
                 mail.subject,
                 mail.timestamp,
                 mail.contents,
-                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                this.mediaContentsJS2Sol(mail.multiMediaContents),
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
@@ -130,7 +157,7 @@ class MailBoxPage extends Component {
                 mail.subject,
                 mail.timestamp,
                 mail.contents,
-                mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                this.mediaContentsJS2Sol(mail.multiMediaContents),
                 mail.isOpen,
             ])
             .send({ from: userAddr });
@@ -160,30 +187,16 @@ class MailBoxPage extends Component {
             return;
         }
 
-        // ipfs
-        console.log(ipfs.getEndpointConfig());
-        console.log(ipfs);
-
         try {
             const { id, multiMediaContents } = mail;
 
-            console.log(multiMediaContents);
-
             await Promise.all(
                 multiMediaContents.map(async (content) => {
-                    // const IPFSHash = await this.uploadFile(content.buffer);
-                    const IPFSHash = "ipfs-hash-not-available";
-
-                    const state = "Code form solidty";
-
-                    content.IPFSHash = IPFSHash;
-
-                    return content;
+                    content.IPFSHash = await this.uploadFile(content.buffer);
                 })
             );
 
             // eth network
-            console.log(mail.uuid);
             await contract.methods
                 .saveMail(userAddr, [
                     mail.uuid,
@@ -192,7 +205,7 @@ class MailBoxPage extends Component {
                     mail.subject,
                     mail.timestamp,
                     mail.contents,
-                    mail.multiMediaContents.map((_var) => [_var.fileName, _var.fileType, _var.IPFSHash]),
+                    this.mediaContentsJS2Sol(mail.multiMediaContents),
                     mail.isOpen,
                 ])
                 .send({ from: userAddr });
@@ -203,8 +216,6 @@ class MailBoxPage extends Component {
             console.log(err);
         }
     };
-
-    onUploadFile = (event) => {};
 
     onCreateMail = (event) => {
         const { userName, userAddr } = this.state;
@@ -240,7 +251,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
                             {type === PAGE_TYPE.DRAFT ? (
-                                <Button variant="outlined" onClick={this.onCreateMail}>
+                                <Button letiant="outlined" onClick={this.onCreateMail}>
                                     new mail
                                 </Button>
                             ) : (

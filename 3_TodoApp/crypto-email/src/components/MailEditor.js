@@ -224,10 +224,8 @@ class MailEditor extends Component {
                 {!readOnly ? (
                     <>
                         <Grid container xs={12}>
-                            {[...this.state.fileList.values()].map((file) => (
-                                <div>
-                                    <AttachFile filename={file.fileName} file={file}/>
-                                </div>
+                            {Array.from(this.state.fileList.values()).map((file) => (
+                                <AttachFile filename={file.fileName} file={file} />
                             ))}
                         </Grid>
                         <Grid container xs={5} className={classes.upload}>
@@ -262,7 +260,7 @@ class MailEditor extends Component {
                     <>
                         <Grid item xs={12}>
                             {[...multiMediaContents.values()].map((file) => (
-                                <AttachFile filename={file.fileName} />
+                                <AttachFile filename={file.fileName} file={file} />
                             ))}
                         </Grid>
                     </>

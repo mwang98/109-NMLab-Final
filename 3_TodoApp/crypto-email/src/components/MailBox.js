@@ -60,7 +60,7 @@ class MailBox extends Component {
                         .filter((mail) => mail.subject.toLowerCase().includes(searchKey))
                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                         .map((mail) => (
-                            <>
+                            <React.Fragment>
                                 <MailCard
                                     mail={mail}
                                     pageType={pageType}
@@ -68,8 +68,8 @@ class MailBox extends Component {
                                     onSelectMail={onSelectMail}
                                     onDeleteMail={onDeleteMail}
                                 />
-                                <Divider variant="inset" component="li" />
-                            </>
+                                <Divider />
+                            </React.Fragment>
                         ))}
                 </List>
                 <TablePagination
