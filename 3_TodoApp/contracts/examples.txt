@@ -8,9 +8,16 @@ mail:
 [["filename1", "filetype1", "hash1"],
 ["filename2", "filetype2", "hash2"]],
 0]
+application:
+[0,
+"mike",
+"0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2", 
+"hi",
+"pending"]
 
 user:
-"0x5B38Da6a701c568545dCfcB03FcB875f56beddC4","Robert","0306","nothing",["1","2","3"],true
+"0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2","Mike","1026","nothing",["1","2","3"],false
+"0x5B38Da6a701c568545dCfcB03FcB875f56beddC4","Robert","0306","nothing",["1","2","3"],false
 
 Available Accounts
 ==================
