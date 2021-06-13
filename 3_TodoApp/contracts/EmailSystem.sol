@@ -8,7 +8,7 @@ contract EmailSystem {
     struct MailBox {
         uint256[] mailIds;
     }
-    struct AppBox{
+    struct AppBox {
         uint256[] appIds;
     }
     struct Mail {
@@ -32,7 +32,7 @@ contract EmailSystem {
         string name;
         string pubKey;
         string description;
-        string[3] icon;
+        string iconIPFSHash;
         MailBox inbox;
         MailBox outbox;
         MailBox draftbox;
@@ -40,7 +40,6 @@ contract EmailSystem {
         bool isAdmin;
         AppBox appBox;
     }
-    
 
     mapping(address => User) generalUsers;
     address[] verifiedUsers;
@@ -48,7 +47,6 @@ contract EmailSystem {
     bool adminExist;
     App[] apps;
     string[] id2uuids;
-    
 
     // init
     constructor() public {
@@ -81,15 +79,15 @@ contract EmailSystem {
         string memory name,
         string memory pubKey,
         string memory discription,
-        string[3] memory icon,
+        string memory iconIPFSHash,
         bool isCertified
     ) public {
         MailBox memory inbox;
         MailBox memory outbox;
         MailBox memory draftbox;
-        AppBox  memory appBox;
+        AppBox memory appBox;
         bool i = false;
-        if(adminExist == false){
+        if (adminExist == false) {
             i = true;
             adminExist = true;
         }
@@ -97,7 +95,7 @@ contract EmailSystem {
             name,
             pubKey,
             discription,
-            icon,
+            iconIPFSHash,
             inbox,
             outbox,
             draftbox,
@@ -106,32 +104,41 @@ contract EmailSystem {
             appBox
         );
     }
-    function getVerifiedUsers() public view returns(address[] memory){
+
+    function getVerifiedUsers() public view returns (address[] memory) {
         return verifiedUsers;
     }
-    function banUser(address addr) public isAdmin(msg.sender){
+
+    function banUser(address addr) public isAdmin(msg.sender) {
         generalUsers[addr].isCertified = false;
     }
-    function acceptApp(uint256 aid) 
-        public 
-        isAdmin(msg.sender){
-        apps[aid].status="accepted";
-        if( generalUsers[apps[aid].addr].isCertified == false){
+
+    function acceptApp(uint256 aid) public isAdmin(msg.sender) {
+        apps[aid].status = "accepted";
+        if (generalUsers[apps[aid].addr].isCertified == false) {
             generalUsers[apps[aid].addr].isCertified = true;
             verifiedUsers.push(apps[aid].addr);
         }
+    }
 
+    function rejectApp(uint256 aid) public isAdmin(msg.sender) {
+        apps[aid].status = "rejected";
     }
-    function rejectApp(uint256 aid) public isAdmin(msg.sender){
-        apps[aid].status="rejected";
-    }
-    function getAppLength() public view returns(uint256){
+
+    function getAppLength() public view returns (uint256) {
         return apps.length;
     }
-    function getAllApp() public isAdmin(msg.sender) view returns(App[] memory){
+
+    function getAllApp()
+        public
+        view
+        isAdmin(msg.sender)
+        returns (App[] memory)
+    {
         return apps;
     }
-    function getUserApp(address addr) public view returns(App[] memory){
+
+    function getUserApp(address addr) public view returns (App[] memory) {
         uint256 numApp = generalUsers[addr].appBox.appIds.length;
         App[] memory ret = new App[](numApp);
         for (uint256 i = 0; i < numApp; i++) {
@@ -140,6 +147,7 @@ contract EmailSystem {
         }
         return ret;
     }
+
     function submitApp(App memory app) public {
         uint256 aid = apps.length;
         generalUsers[app.addr].appBox.appIds.push(aid);
@@ -451,13 +459,20 @@ contract EmailSystem {
             string memory,
             string memory,
             string memory,
-            string[3] memory,
+            string memory,
             bool,
             bool
         )
     {
         User memory u = generalUsers[addr];
-        return (u.name, u.pubKey, u.description, u.icon, u.isCertified, u.isAdmin);
+        return (
+            u.name,
+            u.pubKey,
+            u.description,
+            u.iconIPFSHash,
+            u.isCertified,
+            u.isAdmin
+        );
     }
 
     function openMail(string memory uuid) public {
