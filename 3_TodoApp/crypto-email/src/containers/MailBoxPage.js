@@ -4,12 +4,13 @@ import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
+import uint8ArrayConcat from "uint8arrays/concat";
 
 import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import uint8ArrayConcat from "uint8arrays/concat";
+import { extractUserInfo } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -27,9 +28,9 @@ class MailBoxPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userName: "",
-            userAddr: "",
-            userPubKey: "",
+            name: "",
+            address: "",
+            pubKey: "",
             selectedMid: null,
             mailMap: new Map(),
         };
@@ -39,45 +40,43 @@ class MailBoxPage extends Component {
         const { accounts, contract } = this.props;
         if (!accounts || !contract) return;
 
-        let profile = await contract.methods.getUser(accounts[0]).call();
+        const address = accounts[0];
+        const userInfo = await contract.methods.getUser(address).call();
+        const { name, pubKey } = extractUserInfo(userInfo);
 
-        this.setState({
-            userAddr: accounts[0],
-            userName: profile[0],
-            userPubKey: profile[1],
-        });
+        this.setState({ address, name, pubKey });
 
         await this.updateMyMailBox();
     };
 
     updateMyMailBox = async () => {
-        const { userAddr } = this.state;
+        const { address } = this.state;
         const { contract, type } = this.props;
 
         let mailBox = [];
         let newMailMap = new Map();
         switch (type) {
             case PAGE_TYPE.INBOX:
-                mailBox = await contract.methods.getInboxMails(userAddr).call();
+                mailBox = await contract.methods.getInboxMails(address).call();
                 break;
             case PAGE_TYPE.OUTBOX:
-                mailBox = await contract.methods.getOutboxMails(userAddr).call();
+                mailBox = await contract.methods.getOutboxMails(address).call();
                 break;
             case PAGE_TYPE.DRAFT:
-                mailBox = await contract.methods.getDraftboxMails(userAddr).call();
+                mailBox = await contract.methods.getDraftboxMails(address).call();
         }
         await Promise.all(
             mailBox.map(async (mail) => {
-                const receiverProfile = await contract.methods.getUser(mail.receiverAddr).call();
-                const senderProfile = await contract.methods.getUser(mail.senderAddr).call();
-                const receiverName = receiverProfile[0];
-                const senderName = senderProfile[0];
+                const receiverProfile = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
+                const senderProfile = extractUserInfo(await contract.methods.getUser(mail.senderAddr).call());
+                const receiverName = receiverProfile.name;
+                const senderName = senderProfile.name;
                 const timestamp = parseInt(mail.timestamp, 10);
 
                 const porfile = type === PAGE_TYPE.INBOX ? senderProfile : receiverProfile;
 
-                let { url } = await this.downloadFile(porfile[3]);
-                let { isCertified } = porfile[4];
+                let { url } = await this.downloadFile(porfile.iconIPFSHash);
+                let { isCertified } = porfile.isCertified;
 
                 newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName, imageUrl: url, isCertified });
             })
@@ -113,12 +112,12 @@ class MailBoxPage extends Component {
     mediaContentsSol2JS = (contents) => contents.map((c) => ({ fileName: c[0], fileType: c[1], IPFSHash: c[2] }));
 
     onSelectMail = async (event, mid) => {
-        const { userAddr, mailMap } = this.state;
+        const { address, mailMap } = this.state;
         const { contract, type } = this.props;
         const mail = mailMap.get(mid);
 
         if (type === PAGE_TYPE.INBOX && !mail.isOpen) {
-            await contract.methods.openMail(mid).send({ from: userAddr });
+            await contract.methods.openMail(mid).send({ from: address });
             mail.isOpen = true;
         }
 
@@ -154,11 +153,11 @@ class MailBoxPage extends Component {
     };
 
     onDeleteMail = async (event, mail) => {
-        const { userAddr } = this.state;
+        const { address } = this.state;
         const { contract } = this.props;
 
         await contract.methods
-            .deleteMail(userAddr, [
+            .deleteMail(address, [
                 mail.uuid,
                 mail.senderAddr,
                 mail.receiverAddr,
@@ -168,7 +167,7 @@ class MailBoxPage extends Component {
                 this.mediaContentsJS2Sol(mail.multiMediaContents),
                 mail.isOpen,
             ])
-            .send({ from: userAddr });
+            .send({ from: address });
 
         // client
         this.setState((state) => {
@@ -180,18 +179,18 @@ class MailBoxPage extends Component {
     onSaveMail = async (event, mail) => {
         event.preventDefault();
 
-        const { userAddr } = this.state;
+        const { address } = this.state;
         const { contract } = this.props;
 
         // receiver exsit
         try {
-            var receiverProfile = await contract.methods.getUser(mail.receiverAddr).call();
-            if (receiverProfile[0] === "") {
+            var { name } = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
+            if (name === "") {
                 throw `${mail.receiverAddr} not exists`;
             }
-            mail.receiverName = receiverProfile[0];
+            mail.receiverName = name;
         } catch (err) {
-            alert(receiverProfile ? `${mail.receiverAddr} not exists` : `${mail.receiverAddr} is invalid address`);
+            alert(name === "" ? `${mail.receiverAddr} not exists` : `${mail.receiverAddr} is invalid address`);
             return;
         }
 
@@ -206,7 +205,7 @@ class MailBoxPage extends Component {
 
             // eth network
             await contract.methods
-                .saveMail(userAddr, [
+                .saveMail(address, [
                     mail.uuid,
                     mail.senderAddr,
                     mail.receiverAddr,
@@ -216,7 +215,7 @@ class MailBoxPage extends Component {
                     this.mediaContentsJS2Sol(mail.multiMediaContents),
                     mail.isOpen,
                 ])
-                .send({ from: userAddr });
+                .send({ from: address });
 
             // client
             this.setState((state) => ({ mailMap: state.mailMap.set(id, mail) }));
@@ -226,15 +225,15 @@ class MailBoxPage extends Component {
     };
 
     onCreateMail = (event) => {
-        const { userName, userAddr } = this.state;
+        const { name, address } = this.state;
 
         // create new mail
         const mid = uuidv4();
         const newMail = {
             uuid: mid,
             subject: "<subject>",
-            senderAddr: userAddr,
-            senderName: userName,
+            senderAddr: address,
+            senderName: name,
             receiverAddr: "",
             receiverName: "",
             timestamp: Date.now(),

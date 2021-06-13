@@ -5,8 +5,9 @@ import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-
 import uint8ArrayConcat from "uint8arrays/concat";
+
+import { extractUserInfo } from "../utils/utils";
 
 const styles = (theme) => ({
     container: {
@@ -50,19 +51,20 @@ class CertifiedUserPage extends Component {
         console.log(accounts, contract);
 
         // get user profile from eth
-        let profile = await contract.methods.getUser(address).call();
-        let { imageUrl, imageBuffer } = await this.downloadImage(profile[3]);
+        const userInfo = await contract.methods.getUser(address).call();
+        const { name, pubKey, description, iconIPFSHash, isCertified, isAdmin } = extractUserInfo(userInfo);
+        const { imageUrl, imageBuffer } = await this.downloadImage(iconIPFSHash);
 
-        console.log(profile);
+        console.log(userInfo);
 
         this.setState({
-            address: address,
-            name: profile[0],
-            pubKey: profile[1],
-            description: profile[2],
-            iconIPFSHash: profile[3],
-            isCertified: profile[4],
-            isAdmin: profile[5],
+            address,
+            name,
+            pubKey,
+            description,
+            iconIPFSHash,
+            isCertified,
+            isAdmin,
             imageUrl,
             imageBuffer,
         });
