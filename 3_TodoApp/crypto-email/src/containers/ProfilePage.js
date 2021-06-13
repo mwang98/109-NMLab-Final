@@ -4,6 +4,9 @@ import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+
+import uint8ArrayConcat from "uint8arrays/concat";
 
 const styles = (theme) => ({
     container: {
@@ -29,8 +32,10 @@ class CertifiedUserPage extends Component {
             name: "",
             pubKey: null,
             description: "",
-            iconContent: null,
+            iconIPFSHash: null,
             isCertified: false,
+            imageUrl: "",
+            imageBuffer: null,
         };
     }
 
@@ -43,16 +48,47 @@ class CertifiedUserPage extends Component {
         console.log(accounts, contract);
 
         // get user profile from eth
-        var profile = await contract.methods.getUser(address).call();
+        let profile = await contract.methods.getUser(address).call();
+        let { imageUrl, imageBuffer } = await this.downloadImage(profile[3]);
 
         this.setState({
             address: address,
             name: profile[0],
             pubKey: profile[1],
             description: profile[2],
-            iconContent: profile[3],
+            iconIPFSHash: profile[3],
             isCertified: profile[4],
+            imageUrl,
+            imageBuffer,
         });
+    };
+
+    downloadImage = async (IPFSHash) => {
+        const { imageUrl, imageBuffer } = this.state;
+        const { ipfsNode } = this.props;
+
+        console.log("IPFSHash", IPFSHash);
+        if (!IPFSHash.includes("Qm")) return { imageUrl, imageBuffer };
+
+        let content = [];
+        for await (const chunk of ipfsNode.cat(IPFSHash)) {
+            content.push(chunk);
+        }
+        const imageRaw = uint8ArrayConcat(content);
+        return await this.getImage(imageRaw.buffer);
+    };
+
+    uploadImage = async (buffer) => {
+        const { ipfsNode } = this.props;
+        const { path } = await ipfsNode.add(buffer);
+        return path;
+    };
+
+    getImage = async (arrBuf) => {
+        const blob = new Blob([arrBuf]);
+        const imageUrl = URL.createObjectURL(blob);
+        const imageBuffer = await Buffer.from(arrBuf);
+        return { imageUrl, imageBuffer };
     };
 
     onChangeName = (event) => {
@@ -70,26 +106,57 @@ class CertifiedUserPage extends Component {
     onSubmit = async (event) => {
         // set user profile to eth
         const { contract } = this.props;
-        const { address, name, pubKey, description, iconContent, isCertified } = this.state;
+        const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
+
+        const iconIPFSHash = await this.uploadImage(imageBuffer);
 
         await contract.methods
-            .setUser(address, name, pubKey, description, iconContent, isCertified)
+            .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
             .send({ from: address });
+
+        this.setState({ iconIPFSHash });
+    };
+
+    onUploadIcon = (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const image = event.target.files[0];
+
+        if (!image) return;
+
+        let reader = new window.FileReader();
+        reader.readAsArrayBuffer(image);
+        reader.onloadend = async () => {
+            const { imageUrl, imageBuffer } = await this.getImage(reader.result);
+            this.setState({ imageUrl, imageBuffer });
+        };
     };
 
     render() {
         const { classes } = this.props;
-        const { address, name, pubKey, description, isCertified } = this.state;
+        const { address, name, pubKey, description, isCertified, imageUrl } = this.state;
 
         return (
             <React.Fragment>
                 <Grid container className={classes.container}>
                     <Grid container xs={4} className={classes.container}>
-                        <Avatar
-                            alt={name}
-                            src="/static/images/avatar/1.jpg"
-                            className={isCertified ? classes.largeBorder : classes.large}
+                        <input
+                            accept="image/*"
+                            type="file"
+                            id="icon-upload"
+                            style={{ display: "none" }}
+                            onChange={this.onUploadIcon}
                         />
+                        <label htmlFor="icon-upload">
+                            <IconButton component="span">
+                                <Avatar
+                                    alt={name}
+                                    src={imageUrl}
+                                    className={isCertified ? classes.largeBorder : classes.large}
+                                />
+                            </IconButton>
+                        </label>
                         <TextField
                             margin="dense"
                             label="Name"
