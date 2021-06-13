@@ -73,10 +73,10 @@ class MailBoxPage extends Component {
                 const senderName = senderProfile.name;
                 const timestamp = parseInt(mail.timestamp, 10);
 
-                const porfile = type === PAGE_TYPE.INBOX ? senderProfile : receiverProfile;
+                const profile = type === PAGE_TYPE.INBOX ? senderProfile : receiverProfile;
 
-                let { url } = await this.downloadFile(porfile.iconIPFSHash);
-                let { isCertified } = porfile.isCertified;
+                let { url } = await this.downloadFile(profile.iconIPFSHash);
+                let { isCertified } = profile;
 
                 newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName, imageUrl: url, isCertified });
             })
