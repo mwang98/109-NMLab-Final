@@ -44,13 +44,12 @@ contract EmailSystem {
     mapping(address => User) generalUsers;
     address[] verifiedUsers;
     mapping(string => Mail) mails;
-    bool adminExist;
+    address genesisAdmin;
     App[] apps;
     string[] id2uuids;
 
     // init
     constructor() public {
-        adminExist = false;
     }
 
     // Modifier
@@ -85,11 +84,12 @@ contract EmailSystem {
         MailBox memory inbox;
         MailBox memory outbox;
         MailBox memory draftbox;
-        AppBox memory appBox;
+        AppBox  memory appBox;
+        address a;
         bool i = false;
-        if (adminExist == false) {
+        if( genesisAdmin == addr || genesisAdmin == a){
             i = true;
-            adminExist = true;
+            genesisAdmin = addr;
         }
         generalUsers[addr] = User(
             name,
@@ -150,6 +150,7 @@ contract EmailSystem {
 
     function submitApp(App memory app) public {
         uint256 aid = apps.length;
+        app.id = aid;
         generalUsers[app.addr].appBox.appIds.push(aid);
         apps.push(app);
     }
