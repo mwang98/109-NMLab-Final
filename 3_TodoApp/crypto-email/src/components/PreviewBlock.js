@@ -101,29 +101,29 @@ class CustomizedDialogs extends Component {
         }
         return (
             <div>
-                <Dialog onClose={this.handleClose} aria-labelledby="customized-dialog-title" open={this.props.open}>
+                <Dialog onClose={this.handleClose} aria-labelledby="customized-dialog-title" open={this.props.open} fullWidth={true} maxWidth={'md'}>
                     <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
                     {this.props.filename}
                     </DialogTitle>
                         <DialogContent dividers>
-                            <div  style={{display:this.state.png}}>
-                                <img src={img_url} alt="image preview" width="500"></img>
+                            <div  style={{display:this.state.png, 'text-align':'center' }} >
+                                <img src={img_url} alt="image preview" width="800"></img>
                             </div>
-                            <div  style={{display:this.state.jpg}}>
-                                <img src={img_url} alt="image preview" width="500"></img>
+                            <div  style={{display:this.state.jpg, 'text-align':'center' }}>
+                                <img src={img_url} alt="image preview" width="800"></img>
                             </div>
                             <div  style={{display:this.state.txt}}>
                                 <Typography>
                                     {txtContent}
                                 </Typography>
                             </div>
-                            <div  id="pdfContainer" style={{display:this.state.pdf}} >
+                            <div  id="pdfContainer" style={{display:this.state.pdf, 'text-align':'center' }} >
                                 <PdfPreview file={this.props.file}></PdfPreview>
                             </div>
                         </DialogContent>
                     <DialogActions>
                     <Button autoFocus onClick={this.handleClose} color="primary">
-                        close
+                        download
                     </Button>
                     </DialogActions>
                 </Dialog>

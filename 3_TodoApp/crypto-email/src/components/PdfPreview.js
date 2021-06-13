@@ -62,9 +62,9 @@ class PdfPreview extends Component {
                 file={this.state.pdf}
                 onLoadSuccess={this.onDocumentLoadSuccess}
                 options={options}
-                height={600}
+                height={1000}
               >
-                <Page height={585} pageNumber={this.state.pageNumber} renderTextLayer={false} renderInteractiveForms={false}/>
+                <Page height={980} pageNumber={this.state.pageNumber} renderTextLayer={false} renderInteractiveForms={false}/>
               </Document>
             </div>
             <div style={{display:'inline-block', 'vertical-align': "top"}} className="buttons">

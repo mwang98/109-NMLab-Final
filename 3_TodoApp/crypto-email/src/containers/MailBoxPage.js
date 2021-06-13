@@ -44,7 +44,7 @@ class MailBoxPage extends Component {
         if (!accounts || !contract) return;
 
         var profile = await contract.methods.getUser(accounts[0]).call();
-
+        console.log(profile)
         this.setState({
             userAddr: accounts[0],
             userName: profile[0],
