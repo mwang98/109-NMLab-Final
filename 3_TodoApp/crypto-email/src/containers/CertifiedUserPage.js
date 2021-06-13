@@ -7,6 +7,7 @@ import ApplicationTable from "../components/ApplicationTable";
 import UserBox from "../components/UserBox";
 
 import Status from "../constants/ApplicationStatus.json";
+import { extractUserInfo } from "../utils/utils";
 
 import certifiedUserList from "../mock/user.json";
 import applicationList from "../mock/application";
@@ -27,29 +28,52 @@ class CertifiedUserPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            address: "",
+            isAdmin: false,
             applicationList: [],
             certifiedUserList: [],
         };
     }
 
     componentDidMount = async () => {
-        this.retrieveCertifiedUsers();
-        this.retrieveApplications();
+        const { accounts, contract } = this.props;
+        if (!accounts && !contract) return;
+
+        const address = accounts[0];
+        const userInfo = await contract.methods.getUser(address).call();
+        const { isAdmin } = extractUserInfo(userInfo);
+
+        this.setState({ address, isAdmin });
+
+        await this.retrieveCertifiedUsers();
+        await this.retrieveApplications();
     };
 
     retrieveCertifiedUsers = async () => {
-        this.setState({
-            certifiedUserList: certifiedUserList,
-        });
+        const { contract } = this.props;
 
-        const state = "Code form solidty";
-        // retrieve users from eth networks
+        const certifiedAddress = await contract.methods.getCertifiedUsers().call();
+        const certifiedUserList = await Promise.all(
+            certifiedAddress.map(async (addr) => {
+                const userInfo = await contract.methods.getUser(addr).call();
+                const { name, address, description, iconIPFSHash } = extractUserInfo(userInfo);
+                return { name, address, description, iconIPFSHash };
+            })
+        );
+        console.log(certifiedUserList);
+
+        this.setState({ certifiedUserList });
     };
 
     retrieveApplications = async () => {
-        this.setState({
-            applicationList: applicationList,
-        });
+        console.log("retrieveApplications");
+        const { contract } = this.props;
+
+        if (this.state.isAdmin) {
+            const application = await contract.methods.getAllApp().call();
+            console.log("application", application);
+        } else {
+        }
     };
 
     // admin
@@ -86,7 +110,7 @@ class CertifiedUserPage extends Component {
 
     render() {
         const { classes } = this.props;
-        const { applicationList, certifiedUserList } = this.state;
+        const { isAdmin, applicationList, certifiedUserList } = this.state;
 
         let pendingApplicationList = applicationList.filter((doc) => doc.status === Status.PENDING);
 
@@ -94,7 +118,7 @@ class CertifiedUserPage extends Component {
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
-                        {false ? (
+                        {isAdmin ? (
                             <ReviewTable
                                 pendingApplicationList={pendingApplicationList}
                                 onAgreeApplication={this.onAgreeApplication}

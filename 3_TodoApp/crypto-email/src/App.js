@@ -122,7 +122,14 @@ class App extends Component {
                     />
                     <Route
                         paht="/certified-users"
-                        component={() => <CertifiedUserPage web3={web3} accounts={accounts} contract={contract} />}
+                        component={() => (
+                            <CertifiedUserPage
+                                web3={web3}
+                                accounts={accounts}
+                                contract={contract}
+                                ipfsNode={ipfsNode}
+                            />
+                        )}
                     />
                 </Switch>
             </div>

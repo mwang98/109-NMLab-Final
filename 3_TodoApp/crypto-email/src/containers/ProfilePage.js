@@ -53,6 +53,8 @@ class CertifiedUserPage extends Component {
         let profile = await contract.methods.getUser(address).call();
         let { imageUrl, imageBuffer } = await this.downloadImage(profile[3]);
 
+        console.log(profile);
+
         this.setState({
             address: address,
             name: profile[0],
@@ -113,9 +115,10 @@ class CertifiedUserPage extends Component {
 
         const iconIPFSHash = imageBuffer ? await this.uploadImage(imageBuffer) : this.state.iconIPFSHash;
 
-        await contract.methods
-            .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
-            .send({ from: address });
+        // await contract.methods
+        //     .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
+        //     .send({ from: address });
+        await contract.methods.setUser(address, name, pubKey, description, iconIPFSHash, true).send({ from: address });
 
         this.setState({ iconIPFSHash });
     };
