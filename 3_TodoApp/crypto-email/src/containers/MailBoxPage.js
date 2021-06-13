@@ -68,10 +68,18 @@ class MailBoxPage extends Component {
         }
         await Promise.all(
             mailBox.map(async (mail) => {
-                const receiverName = (await contract.methods.getUser(mail.receiverAddr).call())[0];
-                const senderName = (await contract.methods.getUser(mail.senderAddr).call())[0];
+                const receiverProfile = await contract.methods.getUser(mail.receiverAddr).call();
+                const senderProfile = await contract.methods.getUser(mail.senderAddr).call();
+                const receiverName = receiverProfile[0];
+                const senderName = senderProfile[0];
                 const timestamp = parseInt(mail.timestamp, 10);
-                newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName });
+
+                const porfile = type === PAGE_TYPE.INBOX ? senderProfile : receiverProfile;
+
+                let { url } = await this.downloadFile(porfile[3]);
+                let { isCertified } = porfile[4];
+
+                newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName, imageUrl: url, isCertified });
             })
         );
         this.setState({
@@ -88,17 +96,17 @@ class MailBoxPage extends Component {
     downloadFile = async (IPFSHash) => {
         const { ipfsNode } = this.props;
 
-        console.log("IPFS", IPFSHash);
-
         let content = [];
         for await (const chunk of ipfsNode.cat(IPFSHash)) {
             content.push(chunk);
         }
 
         const contentRaw = uint8ArrayConcat(content);
-        const buffer = await Buffer.from(contentRaw);
+        const blob = new Blob([contentRaw.buffer]);
+        const url = URL.createObjectURL(blob);
+        const buffer = await Buffer.from(contentRaw.buffer);
 
-        return buffer;
+        return { url, buffer };
     };
 
     mediaContentsJS2Sol = (contents) => contents.map((c) => [c.fileName, c.fileType, c.IPFSHash]);
@@ -115,12 +123,12 @@ class MailBoxPage extends Component {
         }
 
         if (mail.multiMediaContents.length && mail.multiMediaContents[0] instanceof Array) {
-            console.log(mail.multiMediaContents);
             mail.multiMediaContents = this.mediaContentsSol2JS(mail.multiMediaContents);
 
             await Promise.all(
                 mail.multiMediaContents.map(async (content) => {
-                    content.buffer = await this.downloadFile(content.IPFSHash);
+                    const { buffer } = await this.downloadFile(content.IPFSHash);
+                    content.buffer = buffer;
                 })
             );
         }

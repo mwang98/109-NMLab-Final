@@ -34,6 +34,7 @@ class MailCard extends Component {
 
     render() {
         const { classes, mail, pageType, selectedMid, onSelectMail, onDeleteMail } = this.props;
+
         return (
             <ListItem
                 button
@@ -49,9 +50,9 @@ class MailCard extends Component {
                             vertical: "bottom",
                             horizontal: "right",
                         }}
-                        badgeContent={<CheckCircleIcon className={classes.certifiedBadge} />}
+                        badgeContent={mail.isCertified ? <CheckCircleIcon className={classes.certifiedBadge} /> : <></>}
                     >
-                        <Avatar alt={mail.senderName} src="/static/images/avatar/1.jpg" />
+                        <Avatar alt={mail.senderName} src={mail.imageUrl} />
                     </Badge>
                 </ListItemAvatar>
                 <ListItemText

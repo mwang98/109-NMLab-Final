@@ -23,9 +23,10 @@ const styles = (theme) => ({
         alignItems: "center",
     },
     large: {
-        width: theme.spacing(10),
-        height: theme.spacing(10),
+        width: theme.spacing(15),
+        height: theme.spacing(15),
         alignSelf: "center",
+        border: "5px solid #E6E6E6",
     },
     submit: {
         justifyContent: "flex-end",
@@ -152,6 +153,7 @@ class MailEditor extends Component {
             contents,
             multiMediaContents,
             isOpen,
+            imageUrl,
         } = this.state.mail;
 
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
@@ -169,7 +171,7 @@ class MailEditor extends Component {
                     />
                 </Grid>
                 <Grid item xs={2}>
-                    <Avatar alt={isInbox ? senderName : receiverName} className={classes.large} src="../logo.png" />
+                    <Avatar alt={isInbox ? senderName : receiverName} src={imageUrl} className={classes.large} />
                 </Grid>
                 <Grid item xs={10} container spacing={2}>
                     <Grid item xs={9}>
