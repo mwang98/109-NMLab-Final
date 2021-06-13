@@ -251,7 +251,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
                             {type === PAGE_TYPE.DRAFT ? (
-                                <Button letiant="outlined" onClick={this.onCreateMail}>
+                                <Button variant="outlined" color="Primary" onClick={this.onCreateMail}>
                                     new mail
                                 </Button>
                             ) : (
