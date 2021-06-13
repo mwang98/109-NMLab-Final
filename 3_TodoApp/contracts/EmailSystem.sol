@@ -8,7 +8,9 @@ contract EmailSystem {
     struct MailBox {
         uint256[] mailIds;
     }
-
+    struct AppBox{
+        uint256[] appIds;
+    }
     struct Mail {
         string uuid;
         address senderAddr;
@@ -19,6 +21,13 @@ contract EmailSystem {
         string[3][] multiMediaContents; // IPFS hash values
         bool isOpen;
     }
+    struct App {
+        uint256 id;
+        string name;
+        address addr;
+        string description;
+        string status;
+    }
     struct User {
         string name;
         string pubKey;
@@ -28,22 +37,27 @@ contract EmailSystem {
         MailBox outbox;
         MailBox draftbox;
         bool isCertified;
+        bool isAdmin;
+        AppBox appBox;
     }
-    address adminAddr;
+    
 
     mapping(address => User) generalUsers;
-    mapping(address => User) verifiedUsers;
+    address[] verifiedUsers;
     mapping(string => Mail) mails;
-    string[] public id2uuids;
+    bool adminExist;
+    App[] apps;
+    string[] id2uuids;
+    
 
     // init
     constructor() public {
-        adminAddr = msg.sender;
+        adminExist = false;
     }
 
     // Modifier
     modifier isAdmin(address addr) {
-        require(addr == adminAddr);
+        require(generalUsers[addr].isAdmin == true);
         _;
     }
     modifier isUserExists(address addr) {
@@ -73,6 +87,12 @@ contract EmailSystem {
         MailBox memory inbox;
         MailBox memory outbox;
         MailBox memory draftbox;
+        AppBox  memory appBox;
+        bool i = false;
+        if(adminExist == false){
+            i = true;
+            adminExist = true;
+        }
         generalUsers[addr] = User(
             name,
             pubKey,
@@ -81,24 +101,49 @@ contract EmailSystem {
             inbox,
             outbox,
             draftbox,
-            isCertified
+            isCertified,
+            i,
+            appBox
         );
     }
-
-    function addCorporateUser(address addr)
-        public
-        isAdmin(msg.sender)
-        isUserExists(addr)
-        returns (bool)
-    {
-        verifiedUsers[addr] = generalUsers[addr];
-        return true;
+    function getVerifiedUsers() public view returns(address[] memory){
+        return verifiedUsers;
     }
+    function banUser(address addr) public isAdmin(msg.sender){
+        generalUsers[addr].isCertified = false;
+    }
+    function acceptApp(uint256 aid) 
+        public 
+        isAdmin(msg.sender){
+        apps[aid].status="accepted";
+        if( generalUsers[apps[aid].addr].isCertified == false){
+            generalUsers[apps[aid].addr].isCertified = true;
+            verifiedUsers.push(apps[aid].addr);
+        }
 
-    function validateCorporateUser(address addr) public view returns (bool) {
-        string memory s;
-        return (keccak256(bytes(verifiedUsers[addr].pubKey)) !=
-            keccak256(bytes(s)));
+    }
+    function rejectApp(uint256 aid) public isAdmin(msg.sender){
+        apps[aid].status="rejected";
+    }
+    function getAppLength() public view returns(uint256){
+        return apps.length;
+    }
+    function getAllApp() public isAdmin(msg.sender) view returns(App[] memory){
+        return apps;
+    }
+    function getUserApp(address addr) public view returns(App[] memory){
+        uint256 numApp = generalUsers[addr].appBox.appIds.length;
+        App[] memory ret = new App[](numApp);
+        for (uint256 i = 0; i < numApp; i++) {
+            uint256 aid = generalUsers[addr].appBox.appIds[i];
+            ret[i] = apps[aid];
+        }
+        return ret;
+    }
+    function submitApp(App memory app) public {
+        uint256 aid = apps.length;
+        generalUsers[app.addr].appBox.appIds.push(aid);
+        apps.push(app);
     }
 
     function sendMail(Mail memory mail) public returns (bool) {
@@ -407,11 +452,12 @@ contract EmailSystem {
             string memory,
             string memory,
             string[3] memory,
+            bool,
             bool
         )
     {
         User memory u = generalUsers[addr];
-        return (u.name, u.pubKey, u.description, u.icon, u.isCertified);
+        return (u.name, u.pubKey, u.description, u.icon, u.isCertified, u.isAdmin);
     }
 
     function openMail(string memory uuid) public {
@@ -425,7 +471,7 @@ contract EmailSystem {
         isUserExists(addr)
         returns (bool)
     {
-        verifiedUsers[addr] = generalUsers[addr];
+        generalUsers[addr].isAdmin = true;
         return true;
     }
 }
