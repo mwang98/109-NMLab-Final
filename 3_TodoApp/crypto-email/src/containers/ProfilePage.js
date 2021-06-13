@@ -4,12 +4,16 @@ import Grid from "@material-ui/core/Grid";
 import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import InputLabel from "@material-ui/core/InputLabel";
 
 const styles = (theme) => ({
     container: {
         justifyContent: "center",
         padding: theme.spacing(5),
+    },
+    largeBorder: {
+        width: theme.spacing(30),
+        height: theme.spacing(30),
+        border: "5px solid #fbc02d",
     },
     large: {
         width: theme.spacing(30),
@@ -55,6 +59,10 @@ class CertifiedUserPage extends Component {
         this.setState({ name: event.target.value });
     };
 
+    onChangePubKey = (event) => {
+        this.setState({ pubKey: event.target.value });
+    };
+
     onChangeDescription = (event) => {
         this.setState({ description: event.target.value });
     };
@@ -71,14 +79,17 @@ class CertifiedUserPage extends Component {
 
     render() {
         const { classes } = this.props;
-        const { name, address, description } = this.state;
+        const { address, name, pubKey, description, isCertified } = this.state;
 
-        console.log(this.state);
         return (
             <React.Fragment>
                 <Grid container className={classes.container}>
                     <Grid container xs={4} className={classes.container}>
-                        <Avatar alt={name} src="/static/images/avatar/1.jpg" className={classes.large} />
+                        <Avatar
+                            alt={name}
+                            src="/static/images/avatar/1.jpg"
+                            className={isCertified ? classes.largeBorder : classes.large}
+                        />
                         <TextField
                             margin="dense"
                             label="Name"
@@ -94,7 +105,14 @@ class CertifiedUserPage extends Component {
                             InputProps={{ readOnly: true }}
                             fullWidth
                             value={address}
-                            onChange={this.onChangeName}
+                        />
+                        <TextField
+                            margin="dense"
+                            label="Public Key"
+                            variant="outlined"
+                            fullWidth
+                            value={pubKey}
+                            onChange={this.onChangePubKey}
                         />
                         <TextField
                             margin="dense"
