@@ -22,10 +22,14 @@ const styles = (theme) => ({
         flexGrow: 1,
         alignItems: "center",
     },
-    large: {
+    certified: {
         width: theme.spacing(15),
         height: theme.spacing(15),
-        alignSelf: "center",
+        border: "5px solid #fbc02d",
+    },
+    uncertified: {
+        width: theme.spacing(15),
+        height: theme.spacing(15),
         border: "5px solid #E6E6E6",
     },
     submit: {
@@ -153,6 +157,7 @@ class MailEditor extends Component {
             contents,
             multiMediaContents,
             isOpen,
+            isCertified,
             imageUrl,
         } = this.state.mail;
 
@@ -171,7 +176,11 @@ class MailEditor extends Component {
                     />
                 </Grid>
                 <Grid item xs={2}>
-                    <Avatar alt={isInbox ? senderName : receiverName} src={imageUrl} className={classes.large} />
+                    <Avatar
+                        alt={isInbox ? senderName : receiverName}
+                        src={imageUrl}
+                        className={isCertified ? classes.certified : classes.uncertified}
+                    />
                 </Grid>
                 <Grid item xs={10} container spacing={2}>
                     <Grid item xs={9}>

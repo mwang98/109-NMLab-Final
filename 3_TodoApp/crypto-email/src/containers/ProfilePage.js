@@ -13,14 +13,15 @@ const styles = (theme) => ({
         justifyContent: "center",
         padding: theme.spacing(5),
     },
-    largeBorder: {
+    certified: {
         width: theme.spacing(30),
         height: theme.spacing(30),
         border: "5px solid #fbc02d",
     },
-    large: {
+    uncertified: {
         width: theme.spacing(30),
         height: theme.spacing(30),
+        border: "5px solid #E6E6E6",
     },
 });
 
@@ -155,7 +156,7 @@ class CertifiedUserPage extends Component {
                                 <Avatar
                                     alt={name}
                                     src={imageUrl}
-                                    className={isCertified ? classes.largeBorder : classes.large}
+                                    className={isCertified ? classes.certified : classes.uncertified}
                                 />
                             </IconButton>
                         </label>
