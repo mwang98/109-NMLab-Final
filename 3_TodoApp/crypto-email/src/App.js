@@ -80,7 +80,9 @@ class App extends Component {
                 <Switch>
                     <Route
                         path="/profile"
-                        component={() => <ProfilePage web3={web3} accounts={accounts} contract={contract} />}
+                        component={() => (
+                            <ProfilePage web3={web3} accounts={accounts} contract={contract} ipfsNode={ipfsNode} />
+                        )}
                     />
                     <Route
                         path="/inbox"

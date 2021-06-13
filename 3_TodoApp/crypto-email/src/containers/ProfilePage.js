@@ -34,6 +34,7 @@ class CertifiedUserPage extends Component {
             description: "",
             iconIPFSHash: null,
             isCertified: false,
+            isAdmin: false,
             imageUrl: "",
             imageBuffer: null,
         };
@@ -58,6 +59,7 @@ class CertifiedUserPage extends Component {
             description: profile[2],
             iconIPFSHash: profile[3],
             isCertified: profile[4],
+            isAdmin: profile[5],
             imageUrl,
             imageBuffer,
         });
@@ -108,7 +110,7 @@ class CertifiedUserPage extends Component {
         const { contract } = this.props;
         const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
 
-        const iconIPFSHash = await this.uploadImage(imageBuffer);
+        const iconIPFSHash = imageBuffer ? await this.uploadImage(imageBuffer) : this.state.iconIPFSHash;
 
         await contract.methods
             .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
