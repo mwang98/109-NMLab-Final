@@ -39,6 +39,8 @@ class CertifiedUserPage extends Component {
 
         const address = accounts[0];
         const userInfo = await contract.methods.getUser(address).call();
+        if (!userInfo) return;
+
         const { name, isAdmin } = extractUserInfo(userInfo);
 
         this.setState({ address, name, isAdmin });
@@ -52,40 +54,48 @@ class CertifiedUserPage extends Component {
 
         const certifiedAddress = await contract.methods.getCertifiedUsers().call();
         const certifiedUserList = await Promise.all(
-            certifiedAddress.map(async (addr) => {
-                const userInfo = await contract.methods.getUser(addr).call();
-                const { name, address, description, iconIPFSHash } = extractUserInfo(userInfo);
+            certifiedAddress.map(async (address) => {
+                const userInfo = await contract.methods.getUser(address).call();
+                const { name, description, iconIPFSHash } = extractUserInfo(userInfo);
                 return { name, address, description, iconIPFSHash };
             })
         );
-        console.log(certifiedUserList);
-
         this.setState({ certifiedUserList });
     };
 
     retrieveApplications = async () => {
-        console.log("retrieveApplications");
         const { contract } = this.props;
         const { address } = this.state;
 
         if (this.state.isAdmin) {
-            const application = await contract.methods.getAllApp().call();
-            console.log("application", application);
+            const result = await contract.methods.getAllApp().call();
+            var applicationList = result.map((a) => extractApplicaiton(a)).filter((a) => a.status === Status.PENDING);
         } else {
             const result = await contract.methods.getUserApp(address).call();
-            const applicationList = result.map((a) => extractApplicaiton(a));
-            this.setState({ applicationList });
+            var applicationList = result.map((a) => extractApplicaiton(a));
         }
+        this.setState({ applicationList });
     };
 
     // admin
-    onAgreeApplication = async (selectedIds) => {
-        this.setState((state) => ({
-            applicationList: state.applicationList.filter((doc) => !selectedIds.includes(doc.id)),
-        }));
-    };
+    onReviewApplication = async (intent, selectedIds) => {
+        const { address } = this.state;
+        const { contract } = this.props;
 
-    onRejectApplication = async (selectedIds) => {
+        switch (intent) {
+            case "accept":
+                await Promise.all(
+                    selectedIds.map(async (id) => contract.methods.acceptApp(id).send({ from: address }))
+                );
+                break;
+            case "reject":
+                await Promise.all(
+                    selectedIds.map(async (id) => contract.methods.rejectApp(id).send({ from: address }))
+                );
+                break;
+            default:
+                console.err("Invalid intent");
+        }
         this.setState((state) => ({
             applicationList: state.applicationList.filter((doc) => !selectedIds.includes(doc.id)),
         }));
@@ -119,17 +129,14 @@ class CertifiedUserPage extends Component {
         const { classes } = this.props;
         const { isAdmin, applicationList, certifiedUserList } = this.state;
 
-        let pendingApplicationList = applicationList.filter((doc) => doc.status === Status.PENDING);
-
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
                         {isAdmin ? (
                             <ReviewTable
-                                pendingApplicationList={pendingApplicationList}
-                                onAgreeApplication={this.onAgreeApplication}
-                                onRejectApplication={this.onRejectApplication}
+                                pendingApplicationList={applicationList}
+                                onReviewApplication={this.onReviewApplication}
                             />
                         ) : (
                             <ApplicationTable
