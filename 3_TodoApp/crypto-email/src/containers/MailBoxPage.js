@@ -90,11 +90,9 @@ class MailBoxPage extends Component {
     uploadMultiMediaContents = async (contents) => {
         const { ipfsNode } = this.props;
         await Promise.all(
-            contents
-                .filter((content) => !content.IPFSHash)
-                .map(async (content) => {
-                    content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
-                })
+            content.map(async (content) => {
+                content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
+            })
         );
     };
 
@@ -127,6 +125,10 @@ class MailBoxPage extends Component {
 
     onSendMail = async (event, mail) => {
         const { contract } = this.props;
+
+        /**** 
+        encrypt
+        **/
 
         await this.uploadMultiMediaContents(mail.multiMediaContents);
         await contract.methods
@@ -175,6 +177,10 @@ class MailBoxPage extends Component {
 
         var { name } = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
         mail.receiverName = name;
+
+        /**** 
+        encrypt
+        **/
 
         await this.uploadMultiMediaContents(mail.multiMediaContents);
         await contract.methods
