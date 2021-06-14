@@ -10,7 +10,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { extractUserInfo } from "../utils/utils";
+import { extractUserInfo, uploadFile, downloadFile } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -37,11 +37,13 @@ class MailBoxPage extends Component {
     }
 
     componentDidMount = async () => {
-        const { accounts, contract } = this.props;
-        if (!accounts || !contract) return;
+        const { accounts, contract, ipfsNode } = this.props;
+        if (!accounts || !contract || !ipfsNode) return;
 
         const address = accounts[0];
         const userInfo = await contract.methods.getUser(address).call();
+        if (!userInfo) return;
+
         const { name, pubKey } = extractUserInfo(userInfo);
 
         this.setState({ address, name, pubKey });
@@ -51,7 +53,7 @@ class MailBoxPage extends Component {
 
     updateMyMailBox = async () => {
         const { address } = this.state;
-        const { contract, type } = this.props;
+        const { contract, type, ipfsNode } = this.props;
 
         let mailBox = [];
         let newMailMap = new Map();
@@ -75,7 +77,7 @@ class MailBoxPage extends Component {
 
                 const profile = type === PAGE_TYPE.INBOX ? senderProfile : receiverProfile;
 
-                let { url } = await this.downloadFile(profile.iconIPFSHash);
+                let { url } = await downloadFile(ipfsNode, profile.iconIPFSHash);
                 let { isCertified } = profile;
 
                 newMailMap.set(mail.uuid, { ...mail, timestamp, receiverName, senderName, imageUrl: url, isCertified });
@@ -86,34 +88,12 @@ class MailBoxPage extends Component {
         });
     };
 
-    uploadFile = async (buffer) => {
-        const { ipfsNode } = this.props;
-        const { path } = await ipfsNode.add(buffer);
-        return path;
-    };
-
-    downloadFile = async (IPFSHash) => {
-        const { ipfsNode } = this.props;
-
-        let content = [];
-        for await (const chunk of ipfsNode.cat(IPFSHash)) {
-            content.push(chunk);
-        }
-
-        const contentRaw = uint8ArrayConcat(content);
-        const blob = new Blob([contentRaw.buffer]);
-        const url = URL.createObjectURL(blob);
-        const buffer = await Buffer.from(contentRaw.buffer);
-
-        return { url, buffer };
-    };
-
     mediaContentsJS2Sol = (contents) => contents.map((c) => [c.fileName, c.fileType, c.IPFSHash]);
     mediaContentsSol2JS = (contents) => contents.map((c) => ({ fileName: c[0], fileType: c[1], IPFSHash: c[2] }));
 
     onSelectMail = async (event, mid) => {
         const { address, mailMap } = this.state;
-        const { contract, type } = this.props;
+        const { contract, type, ipfsNode } = this.props;
         const mail = mailMap.get(mid);
 
         if (type === PAGE_TYPE.INBOX && !mail.isOpen) {
@@ -126,7 +106,7 @@ class MailBoxPage extends Component {
 
             await Promise.all(
                 mail.multiMediaContents.map(async (content) => {
-                    const { buffer } = await this.downloadFile(content.IPFSHash);
+                    const { buffer } = await downloadFile(ipfsNode, content.IPFSHash);
                     content.buffer = buffer;
                 })
             );
@@ -180,7 +160,7 @@ class MailBoxPage extends Component {
         event.preventDefault();
 
         const { address } = this.state;
-        const { contract } = this.props;
+        const { contract, ipfsNode } = this.props;
 
         // receiver exsit
         try {
@@ -199,7 +179,7 @@ class MailBoxPage extends Component {
 
             await Promise.all(
                 multiMediaContents.map(async (content) => {
-                    content.IPFSHash = await this.uploadFile(content.buffer);
+                    content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
                 })
             );
 

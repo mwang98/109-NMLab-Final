@@ -7,7 +7,7 @@ import ApplicationTable from "../components/ApplicationTable";
 import UserBox from "../components/UserBox";
 
 import Status from "../constants/ApplicationStatus.json";
-import { extractUserInfo, extractApplicaiton } from "../utils/utils";
+import { extractUserInfo, extractApplicaiton, downloadFile } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -50,13 +50,14 @@ class CertifiedUserPage extends Component {
     };
 
     retrieveCertifiedUsers = async () => {
-        const { contract } = this.props;
+        const { contract, ipfsNode } = this.props;
 
         const certifiedAddress = await contract.methods.getCertifiedUsers().call();
         const certifiedUserList = await Promise.all(
             certifiedAddress.map(async (address) => {
                 const userInfo = await contract.methods.getUser(address).call();
                 const { name, description, iconIPFSHash } = extractUserInfo(userInfo);
+                const { url } = downloadFile(ipfsNode, iconIPFSHash);
                 return { name, address, description, iconIPFSHash };
             })
         );
