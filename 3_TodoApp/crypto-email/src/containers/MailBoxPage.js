@@ -9,7 +9,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { extractUserInfo, uploadFile, downloadFile } from "../utils/utils";
+import { extractUserInfo, uploadFile, downloadFile, validateAddr } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -123,7 +123,7 @@ class MailBoxPage extends Component {
                 mail.senderAddr,
                 mail.receiverAddr,
                 mail.subject,
-                mail.timestamp,
+                Date.now(),
                 mail.contents,
                 this.mediaContentsJS2Sol(mail.multiMediaContents),
                 mail.isOpen,
@@ -161,17 +161,8 @@ class MailBoxPage extends Component {
         const { address } = this.state;
         const { contract, ipfsNode } = this.props;
 
-        // receiver exsit
-        try {
-            var { name } = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
-            if (name === "") {
-                throw `${mail.receiverAddr} not exists`;
-            }
-            mail.receiverName = name;
-        } catch (err) {
-            alert(name === "" ? `${mail.receiverAddr} not exists` : `${mail.receiverAddr} is invalid address`);
-            return;
-        }
+        var { name } = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
+        mail.receiverName = name;
 
         try {
             const { id, multiMediaContents } = mail;
@@ -189,7 +180,7 @@ class MailBoxPage extends Component {
                     mail.senderAddr,
                     mail.receiverAddr,
                     mail.subject,
-                    mail.timestamp,
+                    Date.now(),
                     mail.contents,
                     this.mediaContentsJS2Sol(mail.multiMediaContents),
                     mail.isOpen,
@@ -231,13 +222,16 @@ class MailBoxPage extends Component {
         const { classes, type } = this.props;
         const { mailMap, selectedMid } = this.state;
 
+        const mailList = Array.from(mailMap.values());
+        mailList.sort((a, b) => b.timestamp - a.timestamp);
+
         return (
             <div className={classes.root}>
                 <Grid container spacing={5}>
                     <Grid item xs={6}>
                         <Paper elevation={3} className={classes.paper}>
                             {type === PAGE_TYPE.DRAFT ? (
-                                <Button variant="outlined" color="Primary" onClick={this.onCreateMail}>
+                                <Button variant="outlined" color="primary" onClick={this.onCreateMail}>
                                     new mail
                                 </Button>
                             ) : (
@@ -258,7 +252,7 @@ class MailBoxPage extends Component {
                     <Grid item xs={6}>
                         <Paper elevation={3}>
                             <MailBox
-                                mailList={[...Array.from(mailMap.values()).reverse()]}
+                                mailList={mailList}
                                 pageType={type}
                                 selectedMid={selectedMid}
                                 onSelectMail={this.onSelectMail}

@@ -47,14 +47,15 @@ class MailEditor extends Component {
         this.state = {
             mail: DummyMail, // for render
             fileList: new Map(),
-            mailIsSaved: true,
+            isMailSaved: true,
+            isMailSent: false,
         };
     }
 
     static getDerivedStateFromProps(props, state) {
         if (!props.mail || !state.mail) return null;
         if (state.mail.uuid !== props.mail.uuid) {
-            return { mail: props.mail, fileList: new Map(), mailIsSaved: true };
+            return { mail: props.mail, fileList: new Map(), isMailSaved: true, isMailSent: false };
         }
         return null;
     }
@@ -100,7 +101,7 @@ class MailEditor extends Component {
                 buffer: null,
                 IPFSHash: null,
             };
-            return { fileList: newFileList.set(id, newFile), mailIsSaved: false };
+            return { fileList: newFileList.set(id, newFile), isMailSaved: false };
         });
 
         let reader = new window.FileReader();
@@ -114,7 +115,7 @@ class MailEditor extends Component {
                 ...state.mail,
                 subject: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
     };
 
@@ -124,7 +125,7 @@ class MailEditor extends Component {
                 ...state.mail,
                 contents: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
     };
 
@@ -134,19 +135,25 @@ class MailEditor extends Component {
                 ...state.mail,
                 receiverAddr: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
     };
 
     onSaveMail = (event, mail) => {
-        this.setState({ mailIsSaved: true });
+        this.setState({ isMailSaved: true });
         mail.multiMediaContents = [...this.state.fileList.values()];
         this.props.onSaveMail(event, mail);
     };
 
+    onSendMail = (event, mail) => {
+        this.setState({ isMailSent: true });
+        mail.multiMediaContents = [...this.state.fileList.values()];
+        this.props.onSendMail(event, mail);
+    };
+
     render() {
-        const { classes, pageType, onSendMail } = this.props;
-        const { mail, mailIsSaved } = this.state;
+        const { classes, pageType } = this.props;
+        const { mail, isMailSaved, isMailSent } = this.state;
         const {
             subject,
             senderAddr,
@@ -248,7 +255,8 @@ class MailEditor extends Component {
                         <Grid container xs={7} spacing={1} className={classes.submit}>
                             <Grid item>
                                 <Button
-                                    variant={mailIsSaved ? "outlined" : "contained"}
+                                    variant={isMailSaved ? "outlined" : "contained"}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SaveAltIcon />}
                                     onClick={(e) => this.onSaveMail(e, mail)}
                                 >
@@ -258,9 +266,9 @@ class MailEditor extends Component {
                             <Grid item>
                                 <Button
                                     variant="outlined"
-                                    disabled={mailIsSaved ? false : true}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SendIcon />}
-                                    onClick={(e) => onSendMail(e, mail)}
+                                    onClick={(e) => this.onSendMail(e, mail)}
                                 >
                                     send
                                 </Button>
