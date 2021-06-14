@@ -34,8 +34,8 @@ class CertifiedUserPage extends Component {
     }
 
     componentDidMount = async () => {
-        const { accounts, contract } = this.props;
-        if (!accounts && !contract) return;
+        const { accounts, contract, ipfsNode } = this.props;
+        if (!accounts || !contract || !ipfsNode) return;
 
         const address = accounts[0];
         const userInfo = await contract.methods.getUser(address).call();

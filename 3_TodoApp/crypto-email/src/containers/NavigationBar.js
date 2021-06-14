@@ -16,6 +16,7 @@ const styles = (theme) => ({
     title: {
         display: "none",
         margin: theme.spacing(2),
+        color: "white",
         [theme.breakpoints.up("sm")]: {
             display: "block",
         },
@@ -47,7 +48,7 @@ class NavigationBar extends Component {
             <div className={classes.grow}>
                 <AppBar position="static">
                     <Toolbar>
-                        <Avatar alt="logo" src="/logo.png" />
+                        <Avatar alt="Crypto Mail" src="../logo.png" />
                         <Typography className={classes.title} variant="h5" noWrap>
                             {"Crypto Mail"}
                         </Typography>

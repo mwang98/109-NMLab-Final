@@ -55,17 +55,14 @@
 
 - Mail Previewer
   - 支援以下資料格式
-    - [ ] Text
-    - [ ] PDF
-    - [ ] Image
+    - [x] Text
+    - [x] PDF
+    - [x] Image
     - [ ] Video
   - [ ] 上傳後移除
 - Send Mail
   - [ ] 加密
   - [ ] 解密
-- Login Page
-  - [ ] Register user/admin (userName, Avatar, password)
-  - [ ] Login user/amin (address, password)
 
 
 ## 進度規劃
@@ -82,11 +79,13 @@
   - [x] New mail 的 route 跳轉設定
   - [ ] Reply 的 route 跳轉設定
   - [ ] Component - Eth 串連
-    - [ ] 自動帶入 senderName、 senderAddr
-    - [ ] 給定 receiverAddr 自動帶入 receiverName
+    - [x] 自動帶入 senderName、 senderAddr
+    - [x] 給定 receiverAddr 自動帶入 receiverName
   - [ ] 加解密
 - 收信
-  - [ ] Component - Eth 串連
+  - [x] Component - Eth 串連
+- 刪除信件
+  - [x] Component - Eth 串連
 - Certified User page
   - User:
     - [ ] 申請成為 corporate account
@@ -99,6 +98,12 @@
     - [ ] user 擷取自己的申請紀錄
     - [ ] admin 擷取所有的申請紀錄
     - [ ] admin 更新申請
+ - UI 顯示
+   - [x] 是否為 Certified User
+     - [x] Profile Page
+     - [x] Mail Card
+     - [x] Mail Editor
+   - [x] 上傳 User Icon
 
 
 ### IPFS Server

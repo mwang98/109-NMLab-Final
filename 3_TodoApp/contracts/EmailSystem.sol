@@ -52,10 +52,10 @@ contract EmailSystem {
     constructor() public {}
 
     // Modifier
-    modifier isAdmin(address addr) {
-        require(generalUsers[addr].isAdmin == true);
-        _;
-    }
+    // modifier isAdmin(address addr) {
+    //     require(generalUsers[addr].isAdmin == true);
+    //     _;
+    // }
     modifier isUserExists(address addr) {
         string memory s;
         require(
@@ -108,11 +108,11 @@ contract EmailSystem {
         return certifiedUsers;
     }
 
-    function banUser(address addr) public isAdmin(msg.sender) {
+    function banUser(address addr) public {
         generalUsers[addr].isCertified = false;
     }
 
-    function acceptApp(uint256 aid) public isAdmin(msg.sender) {
+    function acceptApp(uint256 aid) public {
         apps[aid].status = "accepted";
         if (generalUsers[apps[aid].addr].isCertified == false) {
             generalUsers[apps[aid].addr].isCertified = true;
@@ -120,7 +120,7 @@ contract EmailSystem {
         }
     }
 
-    function rejectApp(uint256 aid) public isAdmin(msg.sender) {
+    function rejectApp(uint256 aid) public {
         apps[aid].status = "rejected";
     }
 
@@ -128,12 +128,7 @@ contract EmailSystem {
         return apps.length;
     }
 
-    function getAllApp()
-        public
-        view
-        isAdmin(msg.sender)
-        returns (App[] memory)
-    {
+    function getAllApp() public view returns (App[] memory) {
         return apps;
     }
 
@@ -480,12 +475,7 @@ contract EmailSystem {
         emit OnOpenMail(msg.sender, uuid);
     }
 
-    function addAdmin(address addr)
-        public
-        isAdmin(msg.sender)
-        isUserExists(addr)
-        returns (bool)
-    {
+    function addAdmin(address addr) public isUserExists(addr) returns (bool) {
         generalUsers[addr].isAdmin = true;
         return true;
     }

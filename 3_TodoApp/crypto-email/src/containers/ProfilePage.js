@@ -5,7 +5,6 @@ import Avatar from "@material-ui/core/Avatar";
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import uint8ArrayConcat from "uint8arrays/concat";
 
 import { extractUserInfo, uploadFile, downloadFile, toUrlNBuffer } from "../utils/utils";
 
@@ -46,10 +45,8 @@ class CertifiedUserPage extends Component {
     componentDidMount = async () => {
         const { accounts, contract, ipfsNode } = this.props;
 
-        if (!accounts && !contract) return;
+        if (!accounts || !contract || !ipfsNode) return;
         const address = accounts[0];
-
-        console.log(accounts, contract);
 
         // get user profile from eth
         const userInfo = await contract.methods.getUser(address).call();
@@ -89,7 +86,6 @@ class CertifiedUserPage extends Component {
     };
 
     onSubmit = async (event) => {
-        // set user profile to eth
         const { contract, ipfsNode } = this.props;
         const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
 
@@ -106,7 +102,6 @@ class CertifiedUserPage extends Component {
         event.stopPropagation();
         event.preventDefault();
 
-        const { ipfsNode } = this.props;
         const image = event.target.files[0];
 
         if (!image) return;
