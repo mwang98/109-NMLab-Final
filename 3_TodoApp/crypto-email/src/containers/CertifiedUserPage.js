@@ -57,8 +57,8 @@ class CertifiedUserPage extends Component {
             certifiedAddress.map(async (address) => {
                 const userInfo = await contract.methods.getUser(address).call();
                 const { name, description, iconIPFSHash } = extractUserInfo(userInfo);
-                const { url } = downloadFile(ipfsNode, iconIPFSHash);
-                return { name, address, description, iconIPFSHash };
+                const { url } = await downloadFile(ipfsNode, iconIPFSHash);
+                return { name, address, description, iconIPFSHash, url };
             })
         );
         this.setState({ certifiedUserList });

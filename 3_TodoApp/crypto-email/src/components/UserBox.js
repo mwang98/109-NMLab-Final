@@ -59,7 +59,7 @@ class UserBox extends Component {
                                 .filter((user) => user.name.toLowerCase().includes(searchKey))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((user) => (
-                                    <UserRow key={user.name} user={user} />
+                                    <UserRow key={user.address} user={user} />
                                 ))}
                         </TableBody>
                     </Table>

@@ -24,6 +24,8 @@ export default function UserRow(props) {
     const [open, setOpen] = React.useState(false);
     const classes = useStyles();
 
+    console.log(user);
+
     return (
         <React.Fragment>
             <TableRow className={classes.root}>
@@ -33,7 +35,7 @@ export default function UserRow(props) {
                     </IconButton>
                 </TableCell>
                 <TableCell align="right">
-                    <Avatar alt={user.name} />
+                    <Avatar alt={user.name} src={user.url} />
                 </TableCell>
                 <TableCell component="th" scope="row">
                     {user.name}
