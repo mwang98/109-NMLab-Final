@@ -90,7 +90,7 @@ class MailBoxPage extends Component {
     uploadMultiMediaContents = async (contents) => {
         const { ipfsNode } = this.props;
         await Promise.all(
-            content.map(async (content) => {
+            contents.map(async (content) => {
                 content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
             })
         );
