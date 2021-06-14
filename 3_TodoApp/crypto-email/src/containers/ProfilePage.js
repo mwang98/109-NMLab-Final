@@ -55,6 +55,7 @@ class CertifiedUserPage extends Component {
         const userInfo = await contract.methods.getUser(address).call();
         if (!userInfo) return;
 
+        console.log(userInfo);
         const { name, pubKey, description, iconIPFSHash, isCertified, isAdmin } = extractUserInfo(userInfo);
         const { url, buffer } = await downloadFile(ipfsNode, iconIPFSHash);
 
@@ -92,7 +93,7 @@ class CertifiedUserPage extends Component {
         const { contract, ipfsNode } = this.props;
         const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
 
-        const iconIPFSHash = imageBuffer ? await uploadFile(ipfsNode, imageBuffer) : this.state.iconIPFSHash;
+        const iconIPFSHash = imageBuffer ? await uploadFile(ipfsNode, imageBuffer) : "";
 
         await contract.methods
             .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
