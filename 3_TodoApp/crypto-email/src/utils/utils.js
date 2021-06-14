@@ -1,5 +1,21 @@
 import uint8ArrayConcat from "uint8arrays/concat";
 import EthCrypto from 'eth-crypto';
+
+const ab2str = async (buf) => {
+    var bufView = new Uint8Array(buf);
+    var unis =""
+    for (var i = 0; i < bufView.length; i++) {
+        unis=unis+String.fromCharCode(bufView[i]);
+    }
+    return unis
+}
+const str2ab = async (str) => {
+    var bufView = new Uint8Array(str.length);
+    for (var i=0, strLen=str.length; i<strLen; i++) {
+        bufView[i] = str.charCodeAt(i);
+    }
+    return bufView;
+}
 const decryptWithPrivateKey = async (priKey, content) => {
     var originContent = content;
     var strAry = content.split(';');
@@ -83,4 +99,4 @@ const toUrlNBuffer = async (arrBuf) => {
     return { url, buffer };
 };
 
-export { decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer };
+export { ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer };

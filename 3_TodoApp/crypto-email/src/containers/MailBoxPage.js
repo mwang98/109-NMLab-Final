@@ -9,7 +9,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { encryptWithPublicKey, decryptWithPrivateKey, extractUserInfo, uploadFile, downloadFile} from "../utils/utils";
+import { ab2str, str2ab, encryptWithPublicKey, decryptWithPrivateKey, extractUserInfo, uploadFile, downloadFile} from "../utils/utils";
 
 
 const styles = (theme) => ({
@@ -200,9 +200,18 @@ class MailBoxPage extends Component {
 
         try {
             const { id, multiMediaContents } = mail;
-
+            var enc = new TextEncoder()
+            var dec = new TextDecoder()
             await Promise.all(
                 multiMediaContents.map(async (content) => {
+                    if(crypto === true){
+                        console.log(content.buffer);
+                        var s = await ab2str(content.buffer);
+                        console.log(s)
+                        s = await encryptWithPublicKey(this.state.pubKey, s);   
+                        console.log(s)
+                        content.buffer = await str2ab(s)
+                    }
                     content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
                 })
             );

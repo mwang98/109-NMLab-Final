@@ -14,7 +14,7 @@ import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
-import { decryptWithPrivateKey, formatTimestamp } from "../utils/utils";
+import { ab2str, str2ab, decryptWithPrivateKey, formatTimestamp } from "../utils/utils";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
 
@@ -154,9 +154,17 @@ class MailEditor extends Component {
         mail.contents = await decryptWithPrivateKey(prikey, mail.contents);
         mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
         console.log(mail.multiMediaContents)
-        
+        var enc = new TextEncoder()
+        var dec = new TextDecoder()
         await Promise.all(
             mail.multiMediaContents.map(async(content) => {
+                console.log(content.buffer);
+                var s = await ab2str(content.buffer);
+                console.log(s);
+                s = await decryptWithPrivateKey(prikey, s);
+                console.log(s);
+                content.buffer = await str2ab(s)
+                console.log(content.buffer)
                 content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
                 content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
             })
