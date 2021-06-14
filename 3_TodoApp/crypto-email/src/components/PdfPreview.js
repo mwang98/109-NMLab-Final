@@ -54,8 +54,8 @@ class PdfPreview extends Component {
     render() {
         return (
             <div className="wrapper">
-                <div style={{ "text-align": "center" }}>
-                    <div style={{ display: "inline-block", "vertical-align": "top" }} className="buttons">
+                <div style={{ textAlign: "center" }}>
+                    <div style={{ display: "inline-block", verticalAlign: "top" }} className="buttons">
                         <div
                             style={{ cursor: "pointer" }}
                             onClick={() => this.handleClick("prev")}
@@ -64,7 +64,7 @@ class PdfPreview extends Component {
                             &#8592;
                         </div>
                     </div>
-                    <div style={{ display: "inline-block", "vertical-align": "top" }}>
+                    <div style={{ display: "inline-block", verticalAlign: "top" }}>
                         <Document
                             className="doc"
                             file={this.state.pdf}
@@ -80,7 +80,7 @@ class PdfPreview extends Component {
                             />
                         </Document>
                     </div>
-                    <div style={{ display: "inline-block", "vertical-align": "top" }} className="buttons">
+                    <div style={{ display: "inline-block", verticalAlign: "top" }} className="buttons">
                         <div
                             style={{ cursor: "pointer" }}
                             onClick={() => this.handleClick("next")}

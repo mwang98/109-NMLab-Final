@@ -87,6 +87,17 @@ class MailBoxPage extends Component {
         });
     };
 
+    uploadMultiMediaContents = async (contents) => {
+        const { ipfsNode } = this.props;
+        await Promise.all(
+            contents
+                .filter((content) => !content.IPFSHash)
+                .map(async (content) => {
+                    content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
+                })
+        );
+    };
+
     mediaContentsJS2Sol = (contents) => contents.map((c) => [c.fileName, c.fileType, c.IPFSHash]);
     mediaContentsSol2JS = (contents) => contents.map((c) => ({ fileName: c[0], fileType: c[1], IPFSHash: c[2] }));
 
@@ -117,6 +128,7 @@ class MailBoxPage extends Component {
     onSendMail = async (event, mail) => {
         const { contract } = this.props;
 
+        await this.uploadMultiMediaContents(mail.multiMediaContents);
         await contract.methods
             .sendMail([
                 mail.uuid,
@@ -159,39 +171,26 @@ class MailBoxPage extends Component {
         event.preventDefault();
 
         const { address } = this.state;
-        const { contract, ipfsNode } = this.props;
+        const { contract } = this.props;
 
         var { name } = extractUserInfo(await contract.methods.getUser(mail.receiverAddr).call());
         mail.receiverName = name;
 
-        try {
-            const { id, multiMediaContents } = mail;
+        await this.uploadMultiMediaContents(mail.multiMediaContents);
+        await contract.methods
+            .saveMail(address, [
+                mail.uuid,
+                mail.senderAddr,
+                mail.receiverAddr,
+                mail.subject,
+                Date.now(),
+                mail.contents,
+                this.mediaContentsJS2Sol(mail.multiMediaContents),
+                mail.isOpen,
+            ])
+            .send({ from: address });
 
-            await Promise.all(
-                multiMediaContents.map(async (content) => {
-                    content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
-                })
-            );
-
-            // eth network
-            await contract.methods
-                .saveMail(address, [
-                    mail.uuid,
-                    mail.senderAddr,
-                    mail.receiverAddr,
-                    mail.subject,
-                    Date.now(),
-                    mail.contents,
-                    this.mediaContentsJS2Sol(mail.multiMediaContents),
-                    mail.isOpen,
-                ])
-                .send({ from: address });
-
-            // client
-            this.setState((state) => ({ mailMap: state.mailMap.set(id, mail) }));
-        } catch (err) {
-            console.log(err);
-        }
+        this.setState((state) => ({ mailMap: state.mailMap.set(mail.id, mail) }));
     };
 
     onCreateMail = (event) => {

@@ -55,7 +55,11 @@ class MailEditor extends Component {
     static getDerivedStateFromProps(props, state) {
         if (!props.mail || !state.mail) return null;
         if (state.mail.uuid !== props.mail.uuid) {
-            return { mail: props.mail, fileList: new Map(), isMailSaved: true, isMailSent: false };
+            const { multiMediaContents } = props.mail;
+            const fileList = new Map();
+            multiMediaContents.map((content) => fileList.set(uuidv4(), content));
+
+            return { mail: props.mail, fileList, isMailSaved: true, isMailSent: false };
         }
         return null;
     }
@@ -148,6 +152,7 @@ class MailEditor extends Component {
     onSendMail = (event, mail) => {
         this.setState({ isMailSent: true });
         mail.multiMediaContents = [...this.state.fileList.values()];
+        console.log(mail);
         this.props.onSendMail(event, mail);
     };
 
@@ -162,7 +167,6 @@ class MailEditor extends Component {
             receiverName,
             timestamp,
             contents,
-            multiMediaContents,
             isOpen,
             isCertified,
             imageUrl,
@@ -239,13 +243,13 @@ class MailEditor extends Component {
                         onChange={this.onChangeContents}
                     />
                 </Grid>
+                <Grid container xs={12}>
+                    {Array.from(this.state.fileList.values()).map((file) => (
+                        <AttachFile filename={file.fileName} file={file} />
+                    ))}
+                </Grid>
                 {!readOnly ? (
-                    <>
-                        <Grid container xs={12}>
-                            {Array.from(this.state.fileList.values()).map((file) => (
-                                <AttachFile filename={file.fileName} file={file} />
-                            ))}
-                        </Grid>
+                    <React.Fragment>
                         <Grid container xs={5} className={classes.upload}>
                             <Button>
                                 <PictureAsPdfIcon />
@@ -274,15 +278,9 @@ class MailEditor extends Component {
                                 </Button>
                             </Grid>
                         </Grid>
-                    </>
+                    </React.Fragment>
                 ) : (
-                    <>
-                        <Grid item xs={12}>
-                            {[...multiMediaContents.values()].map((file) => (
-                                <AttachFile filename={file.fileName} file={file} />
-                            ))}
-                        </Grid>
-                    </>
+                    <></>
                 )}
             </Grid>
         );
