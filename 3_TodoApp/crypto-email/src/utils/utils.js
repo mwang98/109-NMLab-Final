@@ -1,4 +1,5 @@
 import uint8ArrayConcat from "uint8arrays/concat";
+import { getWeb3 } from "react.js-web3";
 
 const formatTimestamp = (timestamp) => {
     var locale = navigator.languages[0];
@@ -8,7 +9,7 @@ const formatTimestamp = (timestamp) => {
 };
 
 const extractUserInfo = (profile) => ({
-    name: profile[0],
+    name: profile[1] !== "" ? profile[0] : "<User Not Existed>",
     pubKey: profile[1],
     description: profile[2],
     iconIPFSHash: profile[3] !== "" ? profile[3] : null,
@@ -50,4 +51,9 @@ const toUrlNBuffer = async (arrBuf) => {
     return { url, buffer };
 };
 
-export { formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer };
+const validateAddr = async (address) => {
+    const web3 = await getWeb3();
+    return web3.utils.isAddress(address);
+};
+
+export { formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer, validateAddr };
