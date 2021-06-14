@@ -7,7 +7,7 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import uint8ArrayConcat from "uint8arrays/concat";
 
-import { extractUserInfo } from "../utils/utils";
+import { extractUserInfo, uploadFile, downloadFile, toUrlNBuffer } from "../utils/utils";
 
 const styles = (theme) => ({
     container: {
@@ -32,18 +32,19 @@ class CertifiedUserPage extends Component {
         this.state = {
             address: "",
             name: "",
-            pubKey: null,
+            pubKey: "",
             description: "",
             iconIPFSHash: null,
             isCertified: false,
             isAdmin: false,
             imageUrl: "",
             imageBuffer: null,
+            otherAddress: "",
         };
     }
 
     componentDidMount = async () => {
-        const { accounts, contract } = this.props;
+        const { accounts, contract, ipfsNode } = this.props;
 
         if (!accounts && !contract) return;
         const address = accounts[0];
@@ -52,10 +53,10 @@ class CertifiedUserPage extends Component {
 
         // get user profile from eth
         const userInfo = await contract.methods.getUser(address).call();
-        const { name, pubKey, description, iconIPFSHash, isCertified, isAdmin } = extractUserInfo(userInfo);
-        const { imageUrl, imageBuffer } = await this.downloadImage(iconIPFSHash);
+        if (!userInfo) return;
 
-        console.log(userInfo);
+        const { name, pubKey, description, iconIPFSHash, isCertified, isAdmin } = extractUserInfo(userInfo);
+        const { url, buffer } = await downloadFile(ipfsNode, iconIPFSHash);
 
         this.setState({
             address,
@@ -65,37 +66,9 @@ class CertifiedUserPage extends Component {
             iconIPFSHash,
             isCertified,
             isAdmin,
-            imageUrl,
-            imageBuffer,
+            imageUrl: url,
+            imageBuffer: buffer,
         });
-    };
-
-    downloadImage = async (IPFSHash) => {
-        const { imageUrl, imageBuffer } = this.state;
-        const { ipfsNode } = this.props;
-
-        console.log("IPFSHash", IPFSHash);
-        if (!IPFSHash.includes("Qm")) return { imageUrl, imageBuffer };
-
-        let content = [];
-        for await (const chunk of ipfsNode.cat(IPFSHash)) {
-            content.push(chunk);
-        }
-        const imageRaw = uint8ArrayConcat(content);
-        return await this.getImage(imageRaw.buffer);
-    };
-
-    uploadImage = async (buffer) => {
-        const { ipfsNode } = this.props;
-        const { path } = await ipfsNode.add(buffer);
-        return path;
-    };
-
-    getImage = async (arrBuf) => {
-        const blob = new Blob([arrBuf]);
-        const imageUrl = URL.createObjectURL(blob);
-        const imageBuffer = await Buffer.from(arrBuf);
-        return { imageUrl, imageBuffer };
     };
 
     onChangeName = (event) => {
@@ -110,17 +83,20 @@ class CertifiedUserPage extends Component {
         this.setState({ description: event.target.value });
     };
 
+    onChangeAddress = (event) => {
+        this.setState({ otherAddress: event.target.value });
+    };
+
     onSubmit = async (event) => {
         // set user profile to eth
-        const { contract } = this.props;
+        const { contract, ipfsNode } = this.props;
         const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
 
-        const iconIPFSHash = imageBuffer ? await this.uploadImage(imageBuffer) : this.state.iconIPFSHash;
+        const iconIPFSHash = imageBuffer ? await uploadFile(ipfsNode, imageBuffer) : this.state.iconIPFSHash;
 
-        // await contract.methods
-        //     .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
-        //     .send({ from: address });
-        await contract.methods.setUser(address, name, pubKey, description, iconIPFSHash, true).send({ from: address });
+        await contract.methods
+            .setUser(address, name, pubKey, description, iconIPFSHash, isCertified)
+            .send({ from: address });
 
         this.setState({ iconIPFSHash });
     };
@@ -129,6 +105,7 @@ class CertifiedUserPage extends Component {
         event.stopPropagation();
         event.preventDefault();
 
+        const { ipfsNode } = this.props;
         const image = event.target.files[0];
 
         if (!image) return;
@@ -136,14 +113,21 @@ class CertifiedUserPage extends Component {
         let reader = new window.FileReader();
         reader.readAsArrayBuffer(image);
         reader.onloadend = async () => {
-            const { imageUrl, imageBuffer } = await this.getImage(reader.result);
-            this.setState({ imageUrl, imageBuffer });
+            const { url, buffer } = await toUrlNBuffer(reader.result);
+            this.setState({ imageUrl: url, imageBuffer: buffer });
         };
+    };
+
+    onAddAdmin = async () => {
+        const { contract } = this.props;
+        const { address, otherAddress } = this.state;
+
+        await contract.methods.addAdmin(otherAddress).send({ from: address });
     };
 
     render() {
         const { classes } = this.props;
-        const { address, name, pubKey, description, isCertified, imageUrl } = this.state;
+        const { address, name, pubKey, description, isCertified, isAdmin, imageUrl, otherAddress } = this.state;
 
         return (
             <React.Fragment>
@@ -203,6 +187,24 @@ class CertifiedUserPage extends Component {
                         <Button variant="outlined" onClick={this.onSubmit}>
                             submit
                         </Button>
+                        {isAdmin ? (
+                            <React.Fragment>
+                                <TextField
+                                    margin="dense"
+                                    label="Address"
+                                    variant="outlined"
+                                    fullWidth
+                                    multiline
+                                    value={otherAddress}
+                                    onChange={this.onChangeAddress}
+                                />
+                                <Button variant="outlined" onClick={this.onAddAdmin}>
+                                    Add Admin
+                                </Button>
+                            </React.Fragment>
+                        ) : (
+                            <></>
+                        )}
                     </Grid>
                 </Grid>
             </React.Fragment>
