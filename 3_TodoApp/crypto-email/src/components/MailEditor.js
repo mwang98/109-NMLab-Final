@@ -48,7 +48,8 @@ class MailEditor extends Component {
         this.state = {
             mail: DummyMail, // for render
             fileList: new Map(),
-            mailIsSaved: true,
+            isMailSaved: true,
+            isMailSent: false,
         };
         
     }
@@ -56,7 +57,8 @@ class MailEditor extends Component {
     static getDerivedStateFromProps(props, state) {
         if (!props.mail || !state.mail) return null;
         if (state.mail.uuid !== props.mail.uuid) {
-            return { mail: props.mail, fileList: new Map(), mailIsSaved: true };
+            const fileList = new Map();
+            return { mail: props.mail, fileList, isMailSaved: true, isMailSent: false };
         }
         return null;
     }
@@ -102,7 +104,7 @@ class MailEditor extends Component {
                 buffer: null,
                 IPFSHash: null,
             };
-            return { fileList: newFileList.set(id, newFile), mailIsSaved: false };
+            return { fileList: newFileList.set(id, newFile), isMailSaved: false };
         });
 
         let reader = new window.FileReader();
@@ -116,7 +118,7 @@ class MailEditor extends Component {
                 ...state.mail,
                 subject: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
     };
 
@@ -126,7 +128,7 @@ class MailEditor extends Component {
                 ...state.mail,
                 contents: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
     };
 
@@ -136,16 +138,8 @@ class MailEditor extends Component {
                 ...state.mail,
                 receiverAddr: event.target.value,
             },
-            mailIsSaved: false,
+            isMailSaved: false,
         }));
-    };
-
-    onSaveMail = (event, mail, crypto) => {
-        this.setState({ mailIsSaved: true });
-        mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
-        this.setState({fileList: new Map()});
-        console.log(mail.multiMediaContents);
-        this.props.onSaveMail(event, mail, crypto);
     };
 
     onDecryptMail = async (e) => {
@@ -153,28 +147,34 @@ class MailEditor extends Component {
         var prikey = prompt("please enter your private key", "")
         mail.contents = await decryptWithPrivateKey(prikey, mail.contents);
         mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
-        console.log(mail.multiMediaContents)
-        var enc = new TextEncoder()
-        var dec = new TextDecoder()
         await Promise.all(
             mail.multiMediaContents.map(async(content) => {
-                console.log(content.buffer);
                 var s = await ab2str(content.buffer);
-                console.log(s);
                 s = await decryptWithPrivateKey(prikey, s);
-                console.log(s);
                 content.buffer = await str2ab(s)
-                console.log(content.buffer)
                 content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
                 content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
             })
         );
         this.setState({mail:mail});
     }
+    onSaveMail = (event, mail, crypto) => {
+        this.setState({ isMailSaved: true });
+        mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
+        this.setState({fileList: new Map()});
+        this.props.onSaveMail(event, mail, crypto);
+    };
+
+    onSendMail = (event, mail, crypto) => {
+        this.setState({ isMailSent: true });
+        mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
+        this.setState({fileList: new Map()});
+        this.props.onSendMail(event, mail, crypto);
+    };
 
     render() {
-        const { classes, pageType, onSendMail } = this.props;
-        const { mail, mailIsSaved } = this.state;
+        const { classes, pageType } = this.props;
+        const { mail, isMailSaved, isMailSent } = this.state;
         const {
             subject,
             senderAddr,
@@ -183,7 +183,6 @@ class MailEditor extends Component {
             receiverName,
             timestamp,
             contents,
-            multiMediaContents,
             isOpen,
             isCertified,
             imageUrl,
@@ -191,7 +190,6 @@ class MailEditor extends Component {
 
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
-        console.log(multiMediaContents);
 
         return (
             <Grid container spacing={3} className={classes.root}>
@@ -249,7 +247,7 @@ class MailEditor extends Component {
                 </Grid>
                 <Grid item>
                     <Button
-                        variant={mailIsSaved ? "outlined" : "contained"}
+                        variant={isMailSaved ? "outlined" : "contained"}
                         startIcon={<DoubleArrowIcon />}
                         onClick={(e) => this.onDecryptMail(e, mail, false)}
                     >
@@ -270,16 +268,16 @@ class MailEditor extends Component {
                         onChange={this.onChangeContents}
                     />
                 </Grid>
+                <Grid container xs={12}>
+                    {Array.from(mail.multiMediaContents.values()).map((file) => (
+                        <AttachFile filename={file.fileName} file={file} />
+                    ))}
+                    {Array.from(this.state.fileList.values()).map((file) => (
+                        <AttachFile filename={file.fileName} file={file} />
+                    ))}
+                </Grid>
                 {!readOnly ? (
-                    <>
-                        <Grid container xs={12}>
-                            {[...multiMediaContents.values()].map((file) => (
-                                <AttachFile filename={file.fileName} file={file} />
-                            ))}
-                            {Array.from(this.state.fileList.values()).map((file) => (
-                                <AttachFile filename={file.fileName} file={file} />
-                            ))}
-                        </Grid>
+                    <React.Fragment>
                         <Grid container xs={5} className={classes.upload}>
                             <Button>
                                 <PictureAsPdfIcon />
@@ -289,7 +287,8 @@ class MailEditor extends Component {
                         <Grid container xs={7} spacing={1} className={classes.submit}>
                             <Grid item>
                                 <Button
-                                    variant={mailIsSaved ? "outlined" : "contained"}
+                                    variant={isMailSaved ? "outlined" : "contained"}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SaveAltIcon />}
                                     onClick={(e) => this.onSaveMail(e, mail, false)}
                                 >
@@ -298,7 +297,8 @@ class MailEditor extends Component {
                             </Grid>
                             <Grid item>
                                 <Button
-                                    variant={mailIsSaved ? "outlined" : "contained"}
+                                    variant={isMailSaved ? "outlined" : "contained"}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SaveAltIcon />}
                                     onClick={(e) => this.onSaveMail(e, mail, true)}
                                 >
@@ -307,34 +307,28 @@ class MailEditor extends Component {
                             </Grid>   
                             <Grid item>
                                 <Button
-                                    variant="outlined"
-                                    disabled={mailIsSaved ? false : true}
+                                    variant={isMailSaved ? "outlined" : "contained"}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SendIcon />}
-                                    onClick={(e) => onSendMail(e, mail, false)}
+                                    onClick={(e) => this.onSendMail(e, mail, false)}
                                 >
                                     send
                                 </Button>
                             </Grid> 
                             <Grid item>
                                 <Button
-                                    variant="outlined"
-                                    disabled={mailIsSaved ? false : true}
+                                    variant={isMailSaved ? "outlined" : "contained"}
+                                    disabled={isMailSent ? true : false}
                                     startIcon={<SendIcon />}
-                                    onClick={(e) => onSendMail(e, mail, true)}
+                                    onClick={(e) => this.onSendMail(e, mail, true)}
                                 >
                                     send with encryption
                                 </Button>
                             </Grid> 
                         </Grid> 
-                    </>
+                    </React.Fragment>
                 ) : (
-                    <>
-                        <Grid item xs={12}>
-                            {[...multiMediaContents.values()].map((file) => (
-                                <AttachFile filename={file.fileName} file={file} />
-                            ))}
-                        </Grid>
-                    </>
+                    <></>
                 )}
             </Grid>
         );

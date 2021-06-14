@@ -1,5 +1,6 @@
 import uint8ArrayConcat from "uint8arrays/concat";
 import EthCrypto from 'eth-crypto';
+import { getWeb3 } from "react.js-web3";
 
 const ab2str = async (buf) => {
     var bufView = new Uint8Array(buf);
@@ -57,7 +58,7 @@ const formatTimestamp = (timestamp) => {
 };
 
 const extractUserInfo = (profile) => ({
-    name: profile[0],
+    name: profile[1] !== "" ? profile[0] : "<User Not Existed>",
     pubKey: profile[1],
     description: profile[2],
     iconIPFSHash: profile[3] !== "" ? profile[3] : null,
@@ -99,4 +100,9 @@ const toUrlNBuffer = async (arrBuf) => {
     return { url, buffer };
 };
 
-export { ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer };
+const validateAddr = async (address) => {
+    const web3 = await getWeb3();
+    return web3.utils.isAddress(address);
+};
+
+export { ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer, validateAddr };

@@ -62,7 +62,6 @@ class CustomizedDialogs extends Component {
     }
     render() {
         var fileExtension = this.getFileExtension(this.props.file["fileName"]);
-        console.log(fileExtension);
         var img_url = "";
         var txtContent = "";
         if (fileExtension === "png") {
