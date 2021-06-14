@@ -37,7 +37,7 @@ class ReviewTable extends Component {
 
     render() {
         const { selectedIds } = this.state;
-        const { pendingApplicationList, onAgreeApplication, onRejectApplication } = this.props;
+        const { pendingApplicationList, onReviewApplication } = this.props;
 
         return (
             <div style={{ height: 730, width: "100%" }}>
@@ -58,8 +58,8 @@ class ReviewTable extends Component {
                     </Grid>
                     <Grid item xs={12}>
                         <ButtonGroup variant={selectedIds.length ? "contained" : "outlined"}>
-                            <Button onClick={() => onAgreeApplication(selectedIds)}>Agree</Button>
-                            <Button onClick={() => onRejectApplication(selectedIds)}>Reject</Button>
+                            <Button onClick={() => onReviewApplication("accept", selectedIds)}>Accept</Button>
+                            <Button onClick={() => onReviewApplication("reject", selectedIds)}>Reject</Button>
                         </ButtonGroup>
                     </Grid>
                 </Grid>
