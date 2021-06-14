@@ -9,7 +9,8 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { extractUserInfo, uploadFile, downloadFile } from "../utils/utils";
+import { encryptWithPublicKey, decryptWithPrivateKey, extractUserInfo, uploadFile, downloadFile} from "../utils/utils";
+
 
 const styles = (theme) => ({
     root: {
@@ -91,6 +92,7 @@ class MailBoxPage extends Component {
     mediaContentsSol2JS = (contents) => contents.map((c) => ({ fileName: c[0], fileType: c[1], IPFSHash: c[2] }));
 
     onSelectMail = async (event, mid) => {
+        console.log('onselect')
         const { address, mailMap } = this.state;
         const { contract, type, ipfsNode } = this.props;
         const mail = mailMap.get(mid);
@@ -114,18 +116,41 @@ class MailBoxPage extends Component {
         this.setState({ selectedMid: mid });
     };
 
-    onSendMail = async (event, mail) => {
+    onSendMail = async (event, mail, crypto) => {
         const { contract } = this.props;
+        var subject = mail.subject;
+        var contents = mail.contents;
+        var MMCs = Array();
+        await mail.multiMediaContents.map(async (content) => {
+            MMCs.push({fileName:content.fileName ,fileType:content.fileType, IPFSHash:content.IPFSHash})
+        })
+        console.log(MMCs);
 
+        if( crypto === true ){
+            const userInfo = await contract.methods.getUser(mail.receiverAddr).call();
+            if (!userInfo) return;
+            const { pubKey } = extractUserInfo(userInfo);
+            if (pubKey==="") return;
+            contents = await encryptWithPublicKey(pubKey, contents);
+            subject = await encryptWithPublicKey(pubKey, subject);
+            console.log(MMCs)
+            await Promise.all(
+                MMCs.map(async (MMC) => {
+                    MMC.fileName = await encryptWithPublicKey(pubKey, MMC.fileName);
+                    MMC.fileType = await encryptWithPublicKey(pubKey, MMC.fileType);
+                })
+            );
+            console.log(MMCs)
+        }
         await contract.methods
             .sendMail([
                 mail.uuid,
                 mail.senderAddr,
                 mail.receiverAddr,
-                mail.subject,
+                subject,
                 mail.timestamp,
-                mail.contents,
-                this.mediaContentsJS2Sol(mail.multiMediaContents),
+                contents,
+                this.mediaContentsJS2Sol(MMCs),
                 mail.isOpen,
             ])
             .send({ from: mail.senderAddr });
@@ -155,7 +180,7 @@ class MailBoxPage extends Component {
         });
     };
 
-    onSaveMail = async (event, mail) => {
+    onSaveMail = async (event, mail, crypto) => {
         event.preventDefault();
 
         const { address } = this.state;
@@ -181,21 +206,38 @@ class MailBoxPage extends Component {
                     content.IPFSHash = await uploadFile(ipfsNode, content.buffer);
                 })
             );
+            var contents = mail.contents;
+            var subject = mail.subject;
+            var MMCs = Array();
+            await mail.multiMediaContents.map(async (content) => {
+                MMCs.push({fileName:content.fileName ,fileType:content.fileType, IPFSHash:content.IPFSHash})
+            })
 
+            
+            if(crypto === true){
+                contents = await encryptWithPublicKey(this.state.pubKey, contents);
+                subject = await encryptWithPublicKey(this.state.pubKey, subject);
+                await Promise.all(
+                    MMCs.map(async (MMC) => {
+                        MMC.fileName = await encryptWithPublicKey(this.state.pubKey, MMC.fileName);
+                        MMC.fileType = await encryptWithPublicKey(this.state.pubKey, MMC.fileType);
+                    })
+                );
+            }
             // eth network
             await contract.methods
                 .saveMail(address, [
                     mail.uuid,
                     mail.senderAddr,
                     mail.receiverAddr,
-                    mail.subject,
+                    subject,
                     mail.timestamp,
-                    mail.contents,
-                    this.mediaContentsJS2Sol(mail.multiMediaContents),
+                    contents,
+                    this.mediaContentsJS2Sol(MMCs),
                     mail.isOpen,
                 ])
                 .send({ from: address });
-
+            console.log(mail.multiMediaContents)
             // client
             this.setState((state) => ({ mailMap: state.mailMap.set(id, mail) }));
         } catch (err) {

@@ -18,15 +18,36 @@ class AttachFile extends Component {
         this.state = {
             previewOpen: false,
             file: "",
+            png: "none",
+            pdf: "none",
+            txt: "none",
+            jpg: "none",
         };
     }
     onClick = (e) => {
         this.setState({ previewOpen: true });
+        var fileExtension = this.getFileExtension(this.props.file["fileName"]);
+        console.log(fileExtension);
+        if (fileExtension === "png") {
+            this.setState({ png: "block" });
+        }
+        if (fileExtension === "txt") {
+            this.setState({ txt: "block" });
+        }
+        if (fileExtension === "jpg") {
+            this.setState({ jpg: "block" });
+        }
+        if (fileExtension === "pdf") {
+            this.setState({ pdf: "block" });
+        }
     };
     previewClose = (e) => {
         this.setState({ previewOpen: false });
     };
 
+    getFileExtension(filename) {
+        return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
+    }
     render() {
         const { classes, filename } = this.props;
         return (
@@ -38,6 +59,10 @@ class AttachFile extends Component {
                     open={this.state.previewOpen}
                     previewClose={this.previewClose}
                     file={this.props.file}
+                    png={this.state.png}
+                    jpg={this.state.jpg}
+                    pdf={this.state.pdf}
+                    txt={this.state.txt}
                 />
             </div>
         );

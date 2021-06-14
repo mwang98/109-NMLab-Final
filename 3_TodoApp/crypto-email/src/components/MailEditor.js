@@ -9,11 +9,12 @@ import Button from "@material-ui/core/Button";
 import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import SendIcon from "@material-ui/icons/Send";
+import DoubleArrowIcon from '@material-ui/icons/DoubleArrow';
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
-import { formatTimestamp } from "../utils/utils";
+import { decryptWithPrivateKey, formatTimestamp } from "../utils/utils";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
 
@@ -49,6 +50,7 @@ class MailEditor extends Component {
             fileList: new Map(),
             mailIsSaved: true,
         };
+        
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -138,11 +140,29 @@ class MailEditor extends Component {
         }));
     };
 
-    onSaveMail = (event, mail) => {
+    onSaveMail = (event, mail, crypto) => {
         this.setState({ mailIsSaved: true });
-        mail.multiMediaContents = [...this.state.fileList.values()];
-        this.props.onSaveMail(event, mail);
+        mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
+        this.setState({fileList: new Map()});
+        console.log(mail.multiMediaContents);
+        this.props.onSaveMail(event, mail, crypto);
     };
+
+    onDecryptMail = async (e) => {
+        var mail = this.state.mail;
+        var prikey = prompt("please enter your private key", "")
+        mail.contents = await decryptWithPrivateKey(prikey, mail.contents);
+        mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
+        console.log(mail.multiMediaContents)
+        
+        await Promise.all(
+            mail.multiMediaContents.map(async(content) => {
+                content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
+                content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
+            })
+        );
+        this.setState({mail:mail});
+    }
 
     render() {
         const { classes, pageType, onSendMail } = this.props;
@@ -163,6 +183,7 @@ class MailEditor extends Component {
 
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
+        console.log(multiMediaContents);
 
         return (
             <Grid container spacing={3} className={classes.root}>
@@ -218,6 +239,15 @@ class MailEditor extends Component {
                         />
                     </Grid>
                 </Grid>
+                <Grid item>
+                    <Button
+                        variant={mailIsSaved ? "outlined" : "contained"}
+                        startIcon={<DoubleArrowIcon />}
+                        onClick={(e) => this.onDecryptMail(e, mail, false)}
+                    >
+                        decrypt
+                    </Button>
+                </Grid>
                 <Grid item xs={12}>
                     <TextField
                         label="Contents"
@@ -235,6 +265,9 @@ class MailEditor extends Component {
                 {!readOnly ? (
                     <>
                         <Grid container xs={12}>
+                            {[...multiMediaContents.values()].map((file) => (
+                                <AttachFile filename={file.fileName} file={file} />
+                            ))}
                             {Array.from(this.state.fileList.values()).map((file) => (
                                 <AttachFile filename={file.fileName} file={file} />
                             ))}
@@ -250,22 +283,41 @@ class MailEditor extends Component {
                                 <Button
                                     variant={mailIsSaved ? "outlined" : "contained"}
                                     startIcon={<SaveAltIcon />}
-                                    onClick={(e) => this.onSaveMail(e, mail)}
+                                    onClick={(e) => this.onSaveMail(e, mail, false)}
                                 >
                                     save
                                 </Button>
                             </Grid>
                             <Grid item>
                                 <Button
+                                    variant={mailIsSaved ? "outlined" : "contained"}
+                                    startIcon={<SaveAltIcon />}
+                                    onClick={(e) => this.onSaveMail(e, mail, true)}
+                                >
+                                    save with encryption
+                                </Button>
+                            </Grid>   
+                            <Grid item>
+                                <Button
                                     variant="outlined"
                                     disabled={mailIsSaved ? false : true}
                                     startIcon={<SendIcon />}
-                                    onClick={(e) => onSendMail(e, mail)}
+                                    onClick={(e) => onSendMail(e, mail, false)}
                                 >
                                     send
                                 </Button>
-                            </Grid>
-                        </Grid>
+                            </Grid> 
+                            <Grid item>
+                                <Button
+                                    variant="outlined"
+                                    disabled={mailIsSaved ? false : true}
+                                    startIcon={<SendIcon />}
+                                    onClick={(e) => onSendMail(e, mail, true)}
+                                >
+                                    send with encryption
+                                </Button>
+                            </Grid> 
+                        </Grid> 
                     </>
                 ) : (
                     <>

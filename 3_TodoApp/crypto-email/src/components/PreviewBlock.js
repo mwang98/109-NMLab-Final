@@ -53,12 +53,6 @@ const DialogActions = withStyles((theme) => ({
 class CustomizedDialogs extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            png: "none",
-            pdf: "none",
-            txt: "none",
-            jpg: "none",
-        };
     }
     handleClose = (e) => {
         this.props.previewClose(e);
@@ -66,23 +60,9 @@ class CustomizedDialogs extends Component {
     getFileExtension(filename) {
         return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
     }
-    componentDidMount() {
-        var fileExtension = this.getFileExtension(this.props.file["fileName"]);
-        if (fileExtension === "png") {
-            this.setState({ png: "block" });
-        }
-        if (fileExtension === "txt") {
-            this.setState({ txt: "block" });
-        }
-        if (fileExtension === "jpg") {
-            this.setState({ jpg: "block" });
-        }
-        if (fileExtension === "pdf") {
-            this.setState({ pdf: "block" });
-        }
-    }
     render() {
         var fileExtension = this.getFileExtension(this.props.file["fileName"]);
+        console.log(fileExtension);
         var img_url = "";
         var txtContent = "";
         if (fileExtension === "png") {
@@ -103,16 +83,16 @@ class CustomizedDialogs extends Component {
                         {this.props.filename}
                     </DialogTitle>
                     <DialogContent dividers>
-                        <div style={{ display: this.state.png }}>
+                        <div style={{ display: this.props.png }}>
                             <img src={img_url} alt="image preview" width="800"></img>
                         </div>
-                        <div style={{ display: this.state.jpg }}>
+                        <div style={{ display: this.props.jpg }}>
                             <img src={img_url} alt="image preview" width="800"></img>
                         </div>
-                        <div style={{ display: this.state.txt }}>
+                        <div style={{ display: this.props.txt }}>
                             <Typography>{txtContent}</Typography>
                         </div>
-                        <div id="pdfContainer" style={{ display: this.state.pdf }}>
+                        <div id="pdfContainer" style={{ display: this.props.pdf }}>
                             <PdfPreview file={this.props.file}></PdfPreview>
                         </div>
                     </DialogContent>
