@@ -1,7 +1,15 @@
 import uint8ArrayConcat from "uint8arrays/concat";
 import EthCrypto from 'eth-crypto';
 import { getWeb3 } from "react.js-web3";
-
+const downloadURL = (data, fileName) => {
+    const a = document.createElement('a')
+    a.href = data
+    a.download = fileName
+    document.body.appendChild(a)
+    a.style.display = 'none'
+    a.click()
+    a.remove()
+}
 const ab2str = async (buf) => {
     var bufView = new Uint8Array(buf);
     var unis =""
@@ -105,4 +113,4 @@ const validateAddr = async (address) => {
     return web3.utils.isAddress(address);
 };
 
-export { ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer, validateAddr };
+export { downloadURL, ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer, validateAddr };

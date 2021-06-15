@@ -9,6 +9,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import PdfPreview from "./PdfPreview";
+import { ab2str, str2ab, downloadURL} from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -60,6 +61,17 @@ class CustomizedDialogs extends Component {
     getFileExtension(filename) {
         return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
     }
+    handleDownload = (e) => {
+
+        const blob = new Blob([this.props.file["buffer"]], {
+            type: this.props.file["fileType"]
+        })
+        const url = window.URL.createObjectURL(blob)
+        downloadURL(url, this.props.file["fileName"])
+          
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+        this.handleClose();
+    }
     render() {
         var fileExtension = this.getFileExtension(this.props.file["fileName"]);
         var img_url = "";
@@ -72,7 +84,7 @@ class CustomizedDialogs extends Component {
         }
         if (fileExtension === "txt") {
             if (this.props.file["buffer"]) {
-                txtContent = new TextDecoder().decode(this.props.file["buffer"]);
+                txtContent = new ab2str(this.props.file["buffer"]);
             }
         }
         return (
@@ -96,7 +108,7 @@ class CustomizedDialogs extends Component {
                         </div>
                     </DialogContent>
                     <DialogActions>
-                        <Button autoFocus onClick={this.handleClose} color="primary">
+                        <Button autoFocus onClick={this.handleDownload} color="primary">
                             download
                         </Button>
                     </DialogActions>

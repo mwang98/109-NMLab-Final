@@ -146,10 +146,6 @@ class MailBoxPage extends Component {
             MMCs.push({fileName:content.fileName ,fileType:content.fileType, IPFSHash:content.IPFSHash})
         })
         if( crypto === true ){
-            const userInfo = await contract.methods.getUser(mail.receiverAddr).call();
-            if (!userInfo) return;
-            const { pubKey } = extractUserInfo(userInfo);
-            if (pubKey==="") return;
             contents = await encryptWithPublicKey(pubKey, contents);
             subject = await encryptWithPublicKey(pubKey, subject);
             await Promise.all(
