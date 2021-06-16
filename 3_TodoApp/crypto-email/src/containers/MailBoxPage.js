@@ -126,8 +126,8 @@ class MailBoxPage extends Component {
     onSendMail = async (event, mail, crypto) => {
         const { contract } = this.props;
 
-        if (!(await validateAddr(mail.receiver))) {
-            alert(`Invalid receiver address: ${mail.receiver}`);
+        if (!(await validateAddr(mail.receiverAddr))) {
+            alert(`Invalid receiver address: ${mail.receiverAddr}`);
             return;
         }
 
@@ -155,6 +155,7 @@ class MailBoxPage extends Component {
                 newMail.isOpen,
             ])
             .send({ from: newMail.senderAddr });
+        await this.updateMyMailBox();
     };
 
     onDeleteMail = async (event, mail) => {
@@ -187,8 +188,8 @@ class MailBoxPage extends Component {
         const { address, pubKey } = this.state;
         const { contract } = this.props;
 
-        if (!(await validateAddr(mail.receiver))) {
-            alert(`Invalid receiver address: ${mail.receiver}`);
+        if (!(await validateAddr(mail.receiverAddr))) {
+            alert(`Invalid receiver address: ${mail.receiverAddr}`);
             return;
         }
         if (!pubKey) {
@@ -214,8 +215,7 @@ class MailBoxPage extends Component {
                 newMail.isOpen,
             ])
             .send({ from: address });
-
-        this.setState((state) => ({ mailMap: state.mailMap.set(mail.id, mail) }));
+        await this.updateMyMailBox();
     };
 
     onCreateMail = (event) => {

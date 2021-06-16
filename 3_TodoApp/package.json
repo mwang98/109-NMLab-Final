@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "eth-crypto": "^1.9.0",
     "ipfs": "^0.55.3",
     "ipfs-client": "^0.4.2",
     "ipfs-core": "^0.7.1",

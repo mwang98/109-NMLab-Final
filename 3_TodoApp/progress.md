@@ -61,8 +61,8 @@
     - [ ] Video
   - [ ] 上傳後移除
 - Send Mail
-  - [ ] 加密
-  - [ ] 解密
+  - [x] 加密
+  - [x] 解密
 
 
 ## 進度規劃
@@ -88,23 +88,25 @@
   - [x] Component - Eth 串連
 - Certified User page
   - User:
-    - [ ] 申請成為 corporate account
-    - [ ] 已通過認證的 corporate account
+    - [x] 申請成為 corporate account
+    - [x] 已通過認證的 corporate account
   - Admin:
-    - [ ] Pending applications
-    - [ ] 已通過認證的 corporate account
+    - [x] Pending applications
+    - [x] 已通過認證的 corporate account
   - 後端：
-    - [ ] user 提交申請
-    - [ ] user 擷取自己的申請紀錄
-    - [ ] admin 擷取所有的申請紀錄
-    - [ ] admin 更新申請
+    - [x] user 提交申請
+    - [x] user 擷取自己的申請紀錄
+    - [x] admin 擷取所有的申請紀錄
+    - [x] admin 更新申請
  - UI 顯示
    - [x] 是否為 Certified User
      - [x] Profile Page
      - [x] Mail Card
      - [x] Mail Editor
    - [x] 上傳 User Icon
-
+ - 修改
+   - UI
+     - [ ] Save / Send UI
 
 ### IPFS Server
 Run IPFS server on docker
