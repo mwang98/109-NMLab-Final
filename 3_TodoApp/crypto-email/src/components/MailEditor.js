@@ -9,11 +9,12 @@ import Button from "@material-ui/core/Button";
 import PictureAsPdfIcon from "@material-ui/icons/PictureAsPdf";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import SendIcon from "@material-ui/icons/Send";
-import DoubleArrowIcon from '@material-ui/icons/DoubleArrow';
+import DoubleArrowIcon from "@material-ui/icons/DoubleArrow";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
+import SaveNSendDialog from "./SaveNSendDialog";
 import { ab2str, str2ab, decryptWithPrivateKey, formatTimestamp } from "../utils/utils";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
@@ -51,7 +52,6 @@ class MailEditor extends Component {
             isMailSaved: true,
             isMailSent: false,
         };
-        
     }
 
     static getDerivedStateFromProps(props, state) {
@@ -144,31 +144,33 @@ class MailEditor extends Component {
 
     onDecryptMail = async (e) => {
         var mail = this.state.mail;
-        var prikey = prompt("please enter your private key", "")
+        var prikey = prompt("please enter your private key", "");
         mail.contents = await decryptWithPrivateKey(prikey, mail.contents);
         mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
         await Promise.all(
-            mail.multiMediaContents.map(async(content) => {
+            mail.multiMediaContents.map(async (content) => {
                 var s = await ab2str(content.buffer);
                 s = await decryptWithPrivateKey(prikey, s);
-                content.buffer = await str2ab(s)
+                content.buffer = await str2ab(s);
                 content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
                 content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
             })
         );
-        this.setState({mail:mail});
-    }
-    onSaveMail = (event, mail, crypto) => {
+        this.setState({ mail: mail });
+    };
+    onSaveMail = (event, crypto) => {
+        const { mail } = this.state;
         this.setState({ isMailSaved: true });
         mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
-        this.setState({fileList: new Map()});
+        this.setState({ fileList: new Map() });
         this.props.onSaveMail(event, mail, crypto);
     };
 
-    onSendMail = (event, mail, crypto) => {
+    onSendMail = (event, crypto) => {
+        const { mail } = this.state;
         this.setState({ isMailSent: true });
         mail.multiMediaContents = [...mail.multiMediaContents.values(), ...this.state.fileList.values()];
-        this.setState({fileList: new Map()});
+        this.setState({ fileList: new Map() });
         this.props.onSendMail(event, mail, crypto);
     };
 
@@ -268,7 +270,7 @@ class MailEditor extends Component {
                         onChange={this.onChangeContents}
                     />
                 </Grid>
-                <Grid container xs={12}>
+                <Grid container xs={12} spcaing={1} direction="column">
                     {Array.from(mail.multiMediaContents.values()).map((file) => (
                         <AttachFile filename={file.fileName} file={file} />
                     ))}
@@ -286,46 +288,24 @@ class MailEditor extends Component {
                         </Grid>
                         <Grid container xs={7} spacing={1} className={classes.submit}>
                             <Grid item>
-                                <Button
+                                <SaveNSendDialog
+                                    onSubmit={this.onSaveMail}
+                                    type="save"
                                     variant={isMailSaved ? "outlined" : "contained"}
-                                    disabled={isMailSent ? true : false}
+                                    disabled={isMailSent}
                                     startIcon={<SaveAltIcon />}
-                                    onClick={(e) => this.onSaveMail(e, mail, false)}
-                                >
-                                    save
-                                </Button>
+                                />
                             </Grid>
                             <Grid item>
-                                <Button
+                                <SaveNSendDialog
+                                    onSubmit={this.onSendMail}
+                                    type="send"
                                     variant={isMailSaved ? "outlined" : "contained"}
-                                    disabled={isMailSent ? true : false}
-                                    startIcon={<SaveAltIcon />}
-                                    onClick={(e) => this.onSaveMail(e, mail, true)}
-                                >
-                                    save with encryption
-                                </Button>
-                            </Grid>   
-                            <Grid item>
-                                <Button
-                                    variant={isMailSaved ? "outlined" : "contained"}
-                                    disabled={isMailSent ? true : false}
+                                    disabled={isMailSent}
                                     startIcon={<SendIcon />}
-                                    onClick={(e) => this.onSendMail(e, mail, false)}
-                                >
-                                    send
-                                </Button>
-                            </Grid> 
-                            <Grid item>
-                                <Button
-                                    variant={isMailSaved ? "outlined" : "contained"}
-                                    disabled={isMailSent ? true : false}
-                                    startIcon={<SendIcon />}
-                                    onClick={(e) => this.onSendMail(e, mail, true)}
-                                >
-                                    send with encryption
-                                </Button>
-                            </Grid> 
-                        </Grid> 
+                                />
+                            </Grid>
+                        </Grid>
                     </React.Fragment>
                 ) : (
                     <></>
