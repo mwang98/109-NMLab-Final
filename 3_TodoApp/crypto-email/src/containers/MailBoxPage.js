@@ -132,9 +132,9 @@ class MailBoxPage extends Component {
         await Promise.all(
             mail.multiMediaContents.map(async (content) => {
                 if(crypto === true){
-                    var s = await ab2str(content.buffer);
+                    var s = ab2str(content.buffer);
                     s = await encryptWithPublicKey(pubKey, s);   
-                    content.buffer = await str2ab(s)
+                    content.buffer = str2ab(s)
                 }
             })
         );
@@ -204,9 +204,9 @@ class MailBoxPage extends Component {
         await Promise.all(
             mail.multiMediaContents.map(async (content) => {
                 if(crypto === true){
-                    var s = await ab2str(content.buffer);
+                    var s = ab2str(content.buffer);
                     s = await encryptWithPublicKey(this.state.pubKey, s);   
-                    content.buffer = await str2ab(s)
+                    content.buffer = str2ab(s)
                 }
             })
         );

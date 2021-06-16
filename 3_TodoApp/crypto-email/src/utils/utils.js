@@ -10,7 +10,7 @@ const downloadURL = (data, fileName) => {
     a.click();
     a.remove();
 };
-const ab2str = async (buf) => {
+const ab2str = (buf) => {
     var bufView = new Uint8Array(buf);
     var unis = "";
     for (var i = 0; i < bufView.length; i++) {
@@ -18,7 +18,7 @@ const ab2str = async (buf) => {
     }
     return unis;
 };
-const str2ab = async (str) => {
+const str2ab = (str) => {
     var bufView = new Uint8Array(str.length);
     for (var i = 0, strLen = str.length; i < strLen; i++) {
         bufView[i] = str.charCodeAt(i);

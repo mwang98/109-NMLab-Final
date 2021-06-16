@@ -149,9 +149,9 @@ class MailEditor extends Component {
         mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
         await Promise.all(
             mail.multiMediaContents.map(async (content) => {
-                var s = await ab2str(content.buffer);
+                var s = ab2str(content.buffer);
                 s = await decryptWithPrivateKey(prikey, s);
-                content.buffer = await str2ab(s);
+                content.buffer = str2ab(s);
                 content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
                 content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
             })
@@ -192,7 +192,6 @@ class MailEditor extends Component {
 
         const readOnly = pageType !== PAGE_TYPE.DRAFT;
         const isInbox = pageType === PAGE_TYPE.INBOX;
-
         return (
             <Grid container spacing={3} className={classes.root}>
                 <Grid item xs={12}>
