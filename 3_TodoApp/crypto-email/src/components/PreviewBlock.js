@@ -80,7 +80,7 @@ class CustomizedDialogs extends Component {
         }
         if (fileExtension === "txt") {
             if (buffer) {
-                var txtContent = new ab2str(buffer);
+                var txtContent = ab2str(buffer);
             }
         }
         return (
@@ -89,20 +89,20 @@ class CustomizedDialogs extends Component {
                     <DialogTitle onClose={this.handleClose}>{fileName}</DialogTitle>
                     <DialogContent dividers>
                         <div style={{ display: this.props.png }}>
-                            <img src={img_url} alt="image preview" width="800"></img>
+                            <img src={img_url} alt="image preview" width="800" />
                         </div>
                         <div style={{ display: this.props.jpg }}>
-                            <img src={img_url} alt="image preview" width="800"></img>
+                            <img src={img_url} alt="image preview" width="800" />
                         </div>
                         <div style={{ display: this.props.txt }}>
                             <Typography>{txtContent}</Typography>
                         </div>
-                        <div id="pdfContainer" style={{ display: this.props.pdf }}>
-                            <PdfPreview file={file}></PdfPreview>
+                        <div style={{ display: this.props.pdf }}>
+                            <PdfPreview file={file} />
                         </div>
                     </DialogContent>
                     <DialogActions>
-                        <Button autoFocus onClick={this.handleDownload} color="primary">
+                        <Button autoFocus onClick={this.handleDownload} variant="outlined">
                             download
                         </Button>
                     </DialogActions>

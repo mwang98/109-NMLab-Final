@@ -20,7 +20,6 @@ class AttachFile extends Component {
         super(props);
         this.state = {
             previewOpen: false,
-            file: "",
             png: "none",
             pdf: "none",
             txt: "none",
@@ -28,9 +27,8 @@ class AttachFile extends Component {
         };
     }
     onClick = (e) => {
-        this.setState({ previewOpen: true });
         var fileExtension = getFileExtension(this.props.file["fileName"]);
-        var state = {};
+        var state = { previewOpen: true };
         if (fileExtension === "png") {
             state.png = "block";
         }
