@@ -8,7 +8,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 
 export default function FormDialog(props) {
     const [open, setOpen] = React.useState(false);
-    const { type, variant, disabled, startIcon } = props;
+    const { type, ...other } = props;
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -25,8 +25,8 @@ export default function FormDialog(props) {
 
     return (
         <React.Fragment>
-            <Button onClick={handleClickOpen} variant={variant} disabled={disabled} startIcon={startIcon}>
-                {props.type}
+            <Button onClick={handleClickOpen} {...other}>
+                {type}
             </Button>
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Encrypt Your Mail</DialogTitle>
@@ -35,10 +35,10 @@ export default function FormDialog(props) {
                 </DialogContent>
                 <DialogActions>
                     <Button variant="outlined" onClick={(e) => onSubmit(e, false)}>
-                        {props.type}
+                        {type}
                     </Button>
                     <Button variant="outlined" onClick={(e) => onSubmit(e, true)}>
-                        {props.type} with encryption
+                        {type} with encryption
                     </Button>
                     <Button onClick={handleClose}>Cancel</Button>
                 </DialogActions>
