@@ -54,6 +54,22 @@ const encryptWithPublicKey = async (pubKey, content) => {
     content = content.iv + ";" + content.ephemPublicKey + ";" + content.ciphertext + ";" + content.mac;
     return content;
 };
+const encryptMail = async (pubKey, mail) => {
+    let { subject, contents, multiMediaContents } = mail;
+
+    subject = await encryptWithPublicKey(pubKey, subject);
+    contents = await encryptWithPublicKey(pubKey, contents);
+    multiMediaContents = await Promise.all(
+        multiMediaContents.map(async (content) => ({
+            fileName: await encryptWithPublicKey(pubKey, content.fileName),
+            fileType: await encryptWithPublicKey(pubKey, content.fileType),
+            buffer: await str2ab(await encryptWithPublicKey(pubKey, await ab2str(content.buffer))),
+            IPFSHash: content.IPFSHash,
+        }))
+    );
+    return { ...mail, subject, contents, multiMediaContents };
+};
+
 const formatTimestamp = (timestamp) => {
     var locale = navigator.languages[0];
     var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -63,7 +79,7 @@ const formatTimestamp = (timestamp) => {
 
 const extractUserInfo = (profile) => ({
     name: profile[1] !== "" ? profile[0] : "<User Not Existed>",
-    pubKey: profile[1],
+    pubKey: profile[1] !== "" ? profile[1] : null,
     description: profile[2],
     iconIPFSHash: profile[3] !== "" ? profile[3] : null,
     isCertified: profile[4],
@@ -125,4 +141,5 @@ export {
     toUrlNBuffer,
     validateAddr,
     getFileExtension,
+    encryptMail,
 };
