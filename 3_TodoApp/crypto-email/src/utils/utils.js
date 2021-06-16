@@ -69,6 +69,20 @@ const encryptMail = async (pubKey, mail) => {
     );
     return { ...mail, subject, contents, multiMediaContents };
 };
+const decryptMail = async (priKey, mail) => {
+    let { subject, contents, multiMediaContents } = mail;
+    subject = await decryptWithPrivateKey(priKey, subject);
+    contents = await decryptWithPrivateKey(priKey, contents);
+    multiMediaContents = await Promise.all(
+        multiMediaContents.map(async (content) => ({
+            fileName: await decryptWithPrivateKey(priKey, content.fileName),
+            fileType: await decryptWithPrivateKey(priKey, content.fileType),
+            buffer: await str2ab(await decryptWithPrivateKey(priKey, await ab2str(content.buffer))),
+            IPFSHash: content.IPFSHash,
+        }))
+    );
+    return { ...mail, subject, contents, multiMediaContents };
+};
 
 const formatTimestamp = (timestamp) => {
     var locale = navigator.languages[0];
@@ -142,4 +156,5 @@ export {
     validateAddr,
     getFileExtension,
     encryptMail,
+    decryptMail,
 };

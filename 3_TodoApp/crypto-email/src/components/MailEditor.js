@@ -15,7 +15,7 @@ import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
 import AttachFile from "./AttachFile";
 import SaveNSendDialog from "./SaveNSendDialog";
-import { ab2str, str2ab, decryptWithPrivateKey, formatTimestamp } from "../utils/utils";
+import { decryptMail, formatTimestamp } from "../utils/utils";
 import { PAGE_TYPE } from "../constants/Page";
 import { DummyMail } from "../constants/Mail";
 
@@ -143,20 +143,9 @@ class MailEditor extends Component {
     };
 
     onDecryptMail = async (e) => {
-        var mail = this.state.mail;
-        var prikey = prompt("please enter your private key", "");
-        mail.contents = await decryptWithPrivateKey(prikey, mail.contents);
-        mail.subject = await decryptWithPrivateKey(prikey, mail.subject);
-        await Promise.all(
-            mail.multiMediaContents.map(async (content) => {
-                var s = await ab2str(content.buffer);
-                s = await decryptWithPrivateKey(prikey, s);
-                content.buffer = await str2ab(s);
-                content.fileName = await decryptWithPrivateKey(prikey, content.fileName);
-                content.fileType = await decryptWithPrivateKey(prikey, content.fileType);
-            })
-        );
-        this.setState({ mail: mail });
+        let prikey = prompt("Please enter your private key", "");
+        let mail = await decryptMail(prikey, this.state.mail);
+        this.setState({ mail });
     };
     onSaveMail = (event, crypto) => {
         const { mail } = this.state;
@@ -249,7 +238,7 @@ class MailEditor extends Component {
                 </Grid>
                 <Grid item>
                     <Button
-                        variant={isMailSaved ? "outlined" : "contained"}
+                        variant="outlined"
                         startIcon={<DoubleArrowIcon />}
                         onClick={(e) => this.onDecryptMail(e, mail, false)}
                     >
