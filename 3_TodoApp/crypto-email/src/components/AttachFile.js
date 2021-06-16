@@ -11,6 +11,7 @@ const styles = (theme) => ({
         display: "flex",
         flexDirection: "row",
         margin: theme.spacing(1),
+        cursor: "pointer",
     },
 });
 
@@ -28,7 +29,7 @@ class AttachFile extends Component {
     }
     onClick = (e) => {
         this.setState({ previewOpen: true });
-        var fileExtension = getFileExtension(this.props.file["fileName"]).toLowerCase();
+        var fileExtension = getFileExtension(this.props.file["fileName"]);
         var state = {};
         if (fileExtension === "png") {
             state.png = "block";
@@ -49,16 +50,15 @@ class AttachFile extends Component {
     };
 
     render() {
-        const { classes, filename } = this.props;
+        const { classes, filename, file } = this.props;
         return (
-            <div className={classes.root} style={{ cursor: "pointer" }}>
+            <div className={classes.root}>
                 <AttachFileIcon onClick={this.onClick} />
                 <Typography onClick={this.onClick}> {filename} </Typography>
                 <PreviewBlock
-                    filename={filename}
                     open={this.state.previewOpen}
                     previewClose={this.previewClose}
-                    file={this.props.file}
+                    file={file}
                     png={this.state.png}
                     jpg={this.state.jpg}
                     pdf={this.state.pdf}

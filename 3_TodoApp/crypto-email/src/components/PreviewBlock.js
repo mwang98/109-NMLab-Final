@@ -59,42 +59,34 @@ class CustomizedDialogs extends Component {
         this.props.previewClose(e);
     };
     handleDownload = (e) => {
-        const blob = new Blob([this.props.file["buffer"]], {
-            type: this.props.file["fileType"],
-        });
-        const url = window.URL.createObjectURL(blob);
-        downloadURL(url, this.props.file["fileName"]);
+        const { fileName, fileType, buffer } = this.props.file;
+        const blob = new Blob([buffer], { type: fileType });
+        const url = URL.createObjectURL(blob);
+        downloadURL(url, fileName);
 
-        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         this.handleClose();
     };
     render() {
-        var fileExtension = getFileExtension(this.props.file["fileName"]);
-        var img_url = "";
-        var txtContent = "";
+        const { file } = this.props;
+        const { fileName, buffer } = file;
+
+        var fileExtension = getFileExtension(fileName);
         if (fileExtension === "png") {
-            img_url = URL.createObjectURL(new Blob([this.props.file["buffer"]], { type: "image/png" } /* (1) */));
+            var img_url = URL.createObjectURL(new Blob([buffer], { type: "image/png" } /* (1) */));
         }
         if (fileExtension === "jpg") {
-            img_url = URL.createObjectURL(new Blob([this.props.file["buffer"]], { type: "image/jpg" } /* (1) */));
+            var img_url = URL.createObjectURL(new Blob([buffer], { type: "image/jpg" } /* (1) */));
         }
         if (fileExtension === "txt") {
-            if (this.props.file["buffer"]) {
-                txtContent = new ab2str(this.props.file["buffer"]);
+            if (buffer) {
+                var txtContent = new ab2str(buffer);
             }
         }
         return (
             <div>
-                <Dialog
-                    onClose={this.handleClose}
-                    aria-labelledby="customized-dialog-title"
-                    open={this.props.open}
-                    fullWidth={true}
-                    maxWidth={"md"}
-                >
-                    <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
-                        {this.props.filename}
-                    </DialogTitle>
+                <Dialog onClose={this.handleClose} open={this.props.open} fullWidth={true} maxWidth={"md"}>
+                    <DialogTitle onClose={this.handleClose}>{fileName}</DialogTitle>
                     <DialogContent dividers>
                         <div style={{ display: this.props.png }}>
                             <img src={img_url} alt="image preview" width="800"></img>
@@ -106,7 +98,7 @@ class CustomizedDialogs extends Component {
                             <Typography>{txtContent}</Typography>
                         </div>
                         <div id="pdfContainer" style={{ display: this.props.pdf }}>
-                            <PdfPreview file={this.props.file}></PdfPreview>
+                            <PdfPreview file={file}></PdfPreview>
                         </div>
                     </DialogContent>
                     <DialogActions>
