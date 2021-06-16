@@ -9,7 +9,7 @@ import "./MailBoxPage.css";
 import MailBox from "../components/MailBox";
 import MailPreview from "../components/MailEditor";
 import { PAGE_TYPE } from "../constants/Page";
-import { ab2str, str2ab, encryptWithPublicKey, decryptWithPrivateKey, extractUserInfo, uploadFile, downloadFile, validateAddr} from "../utils/utils";
+import { ab2str, str2ab, encryptWithPublicKey, extractUserInfo, uploadFile, downloadFile, validateAddr} from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
