@@ -1,63 +1,59 @@
 import uint8ArrayConcat from "uint8arrays/concat";
-import EthCrypto from 'eth-crypto';
+import EthCrypto from "eth-crypto";
 import { getWeb3 } from "react.js-web3";
 const downloadURL = (data, fileName) => {
-    const a = document.createElement('a')
-    a.href = data
-    a.download = fileName
-    document.body.appendChild(a)
-    a.style.display = 'none'
-    a.click()
-    a.remove()
-}
+    const a = document.createElement("a");
+    a.href = data;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.style.display = "none";
+    a.click();
+    a.remove();
+};
 const ab2str = async (buf) => {
     var bufView = new Uint8Array(buf);
-    var unis =""
+    var unis = "";
     for (var i = 0; i < bufView.length; i++) {
-        unis=unis+String.fromCharCode(bufView[i]);
+        unis = unis + String.fromCharCode(bufView[i]);
     }
-    return unis
-}
+    return unis;
+};
 const str2ab = async (str) => {
     var bufView = new Uint8Array(str.length);
-    for (var i=0, strLen=str.length; i<strLen; i++) {
+    for (var i = 0, strLen = str.length; i < strLen; i++) {
         bufView[i] = str.charCodeAt(i);
     }
     return bufView;
-}
+};
 const decryptWithPrivateKey = async (priKey, content) => {
     var originContent = content;
-    var strAry = content.split(';');
+    var strAry = content.split(";");
     content = {
-        iv:strAry[0],
-        ephemPublicKey:strAry[1],
-        ciphertext:strAry[2],
-        mac:strAry[3]
-    }
+        iv: strAry[0],
+        ephemPublicKey: strAry[1],
+        ciphertext: strAry[2],
+        mac: strAry[3],
+    };
     try {
         content = await EthCrypto.decryptWithPrivateKey(priKey, content);
-    }
-    catch (e) {
-        console.log(e)
+    } catch (e) {
+        console.log(e);
         return originContent;
     }
     return content;
 };
 const encryptWithPublicKey = async (pubKey, content) => {
     var originContent = content;
-    try { // statements to try
+    try {
+        // statements to try
         content = await EthCrypto.encryptWithPublicKey(pubKey, content);
-    }
-    catch (e) {
+    } catch (e) {
         console.log(e);
         return originContent;
     }
-    content = content.iv+';'+
-                content.ephemPublicKey+';'+
-                content.ciphertext+';'+
-                content.mac;
-    return content
-}
+    content = content.iv + ";" + content.ephemPublicKey + ";" + content.ciphertext + ";" + content.mac;
+    return content;
+};
 const formatTimestamp = (timestamp) => {
     var locale = navigator.languages[0];
     var timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -113,4 +109,20 @@ const validateAddr = async (address) => {
     return web3.utils.isAddress(address);
 };
 
-export { downloadURL, ab2str, str2ab, decryptWithPrivateKey, encryptWithPublicKey, formatTimestamp, extractUserInfo, extractApplicaiton, uploadFile, downloadFile, toUrlNBuffer, validateAddr };
+const getFileExtension = (filename) => (/[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0].toLowerCase() : undefined);
+
+export {
+    downloadURL,
+    ab2str,
+    str2ab,
+    decryptWithPrivateKey,
+    encryptWithPublicKey,
+    formatTimestamp,
+    extractUserInfo,
+    extractApplicaiton,
+    uploadFile,
+    downloadFile,
+    toUrlNBuffer,
+    validateAddr,
+    getFileExtension,
+};

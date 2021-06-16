@@ -9,7 +9,7 @@ import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 import Typography from "@material-ui/core/Typography";
 import PdfPreview from "./PdfPreview";
-import { ab2str, str2ab, downloadURL} from "../utils/utils";
+import { ab2str, downloadURL, getFileExtension } from "../utils/utils";
 
 const styles = (theme) => ({
     root: {
@@ -58,22 +58,18 @@ class CustomizedDialogs extends Component {
     handleClose = (e) => {
         this.props.previewClose(e);
     };
-    getFileExtension(filename) {
-        return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
-    }
     handleDownload = (e) => {
-
         const blob = new Blob([this.props.file["buffer"]], {
-            type: this.props.file["fileType"]
-        })
-        const url = window.URL.createObjectURL(blob)
-        downloadURL(url, this.props.file["fileName"])
-          
-        setTimeout(() => window.URL.revokeObjectURL(url), 1000)
+            type: this.props.file["fileType"],
+        });
+        const url = window.URL.createObjectURL(blob);
+        downloadURL(url, this.props.file["fileName"]);
+
+        setTimeout(() => window.URL.revokeObjectURL(url), 1000);
         this.handleClose();
-    }
+    };
     render() {
-        var fileExtension = this.getFileExtension(this.props.file["fileName"]);
+        var fileExtension = getFileExtension(this.props.file["fileName"]);
         var img_url = "";
         var txtContent = "";
         if (fileExtension === "png") {
@@ -89,7 +85,13 @@ class CustomizedDialogs extends Component {
         }
         return (
             <div>
-                <Dialog onClose={this.handleClose} aria-labelledby="customized-dialog-title" open={this.props.open} fullWidth={true} maxWidth={'md'}>
+                <Dialog
+                    onClose={this.handleClose}
+                    aria-labelledby="customized-dialog-title"
+                    open={this.props.open}
+                    fullWidth={true}
+                    maxWidth={"md"}
+                >
                     <DialogTitle id="customized-dialog-title" onClose={this.handleClose}>
                         {this.props.filename}
                     </DialogTitle>

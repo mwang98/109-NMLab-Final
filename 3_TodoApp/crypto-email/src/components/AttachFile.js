@@ -4,6 +4,8 @@ import Typography from "@material-ui/core/Typography";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
 import PreviewBlock from "./PreviewBlock";
 
+import { getFileExtension } from "../utils/utils";
+
 const styles = (theme) => ({
     root: {
         display: "flex",
@@ -26,28 +28,26 @@ class AttachFile extends Component {
     }
     onClick = (e) => {
         this.setState({ previewOpen: true });
-        var fileExtension = this.getFileExtension(this.props.file["fileName"]);
-        console.log(fileExtension);
+        var fileExtension = getFileExtension(this.props.file["fileName"]).toLowerCase();
+        var state = {};
         if (fileExtension === "png") {
-            this.setState({ png: "block" });
+            state.png = "block";
         }
         if (fileExtension === "txt") {
-            this.setState({ txt: "block" });
+            state.txt = "block";
         }
         if (fileExtension === "jpg") {
-            this.setState({ jpg: "block" });
+            state.jpg = "block";
         }
         if (fileExtension === "pdf") {
-            this.setState({ pdf: "block" });
+            state.pdf = "block";
         }
+        this.setState(state);
     };
     previewClose = (e) => {
         this.setState({ previewOpen: false });
     };
 
-    getFileExtension(filename) {
-        return /[.]/.exec(filename) ? /[^.]+$/.exec(filename)[0] : undefined;
-    }
     render() {
         const { classes, filename } = this.props;
         return (
