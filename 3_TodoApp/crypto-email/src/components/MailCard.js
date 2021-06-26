@@ -55,14 +55,17 @@ class MailCard extends Component {
                         <Avatar alt={mail.senderName} src={mail.imageUrl} />
                     </Badge>
                 </ListItemAvatar>
-                <ListItemText
-                    primary={mail.subject}
-                    secondary={
-                        <Typography component="span" color="textPrimary" className={classes.bold}>
-                            {`${pageType === PAGE_TYPE.DRAFT ? "receiver: " : ""} ${mail.senderName}`}
-                        </Typography>
-                    }
-                />
+                <div style={{overflow: "hidden", textOverflow: "ellipsis", width: '15rem'}}>
+                    <ListItemText
+                        primary={mail.subject}
+                        secondary={
+                            <Typography component="span" color="textPrimary" className={classes.bold}>
+                                {`${pageType === PAGE_TYPE.DRAFT ? "receiver: " : ""} ${mail.senderName}`}
+                            </Typography>
+                        }
+                    />
+                </div>
+                <div style={{width: '15rem'}}></div>
                 <ListItemText primary={formatTimestamp(mail.timestamp)} />
                 <ListItemSecondaryAction>
                     <IconButton onClick={(event) => onDeleteMail(event, mail)}>
