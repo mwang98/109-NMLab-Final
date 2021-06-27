@@ -36,7 +36,7 @@ Note that if the program is not running on a macOS system, please run
 
 To start ganache-cli emulator:
 
-```bash
+```
 ~$ ganache-cli --account_keys_path FILE.json
 ```
 
@@ -44,13 +44,13 @@ FILE.json will contain accounts information.
 
 To show the activated accounts information:
 
-```bash
+```
 ~$ python3 account.py FILE.json
 ```
 
 To compile and deploy the smart contract:
 
-```bash
+```
 ~$ truffle compile 
 ~$ truffle migrate
 ```
@@ -86,7 +86,7 @@ Second, Import the valid accounts by entering their private keys. The network sh
 
 The accounts info can be found by:
 
-```bash
+```
 ~$ python3 account.py FILE.json
 ```
 
