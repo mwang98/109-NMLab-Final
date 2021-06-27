@@ -31,7 +31,9 @@ export default function FormDialog(props) {
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Encrypt Your Mail</DialogTitle>
                 <DialogContent>
-                    <DialogContentText>Some Description ...</DialogContentText>
+                    <DialogContentText>
+                        To secure your personal information, we highly reommend to encrypt your mail
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button variant="outlined" onClick={(e) => onSubmit(e, false)}>

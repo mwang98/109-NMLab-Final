@@ -52,7 +52,7 @@ class AttachFile extends Component {
         return (
             <div className={classes.root}>
                 <AttachFileIcon onClick={this.onClick} />
-                <Typography onClick={this.onClick}> {filename} </Typography>
+                <Typography onClick={this.onClick}> {filename.substring(0, 50)} </Typography>
                 <PreviewBlock
                     open={this.state.previewOpen}
                     previewClose={this.previewClose}

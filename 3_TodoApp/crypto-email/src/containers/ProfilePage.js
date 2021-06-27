@@ -89,6 +89,10 @@ class CertifiedUserPage extends Component {
         const { contract, ipfsNode } = this.props;
         const { address, name, pubKey, description, isCertified, imageBuffer } = this.state;
 
+        if (!pubKey) {
+            alert("Public key is required !");
+            return;
+        }
         const iconIPFSHash = imageBuffer ? await uploadFile(ipfsNode, imageBuffer) : "";
 
         await contract.methods

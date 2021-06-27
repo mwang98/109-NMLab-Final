@@ -162,24 +162,27 @@ class MailBoxPage extends Component {
         const { address } = this.state;
         const { contract } = this.props;
 
-        await contract.methods
-            .deleteMail(address, [
-                mail.uuid,
-                mail.senderAddr,
-                mail.receiverAddr,
-                mail.subject,
-                mail.timestamp,
-                mail.contents,
-                this.mediaContentsJS2Sol(mail.multiMediaContents),
-                mail.isOpen,
-            ])
-            .send({ from: address });
-
-        // client
-        this.setState((state) => {
-            state.mailMap.delete(mail.uuid);
-            return state;
-        });
+        try {
+            await contract.methods
+                .deleteMail(address, [
+                    mail.uuid,
+                    mail.senderAddr,
+                    mail.receiverAddr,
+                    mail.subject,
+                    mail.timestamp,
+                    mail.contents,
+                    this.mediaContentsJS2Sol(mail.multiMediaContents),
+                    mail.isOpen,
+                ])
+                .send({ from: address });
+        } catch (e) {
+        } finally {
+            // client
+            this.setState((state) => {
+                state.mailMap.delete(mail.uuid);
+                return state;
+            });
+        }
     };
 
     onSaveMail = async (event, mail, crypto) => {
