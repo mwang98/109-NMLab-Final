@@ -69,6 +69,7 @@ In directory App/crypto-email/, use yarn to install the packages:
 
 ```
 ~$ yarn install
+~$ yarn add eth-crypto
 ```
 p.s. try sudo if any unexpected errors
 
